@@ -4,7 +4,6 @@ import java.sql.*;
 public class Database {
 
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		String url = "jdbc:mysql://localhost/Aquarium";
 		String username = "root";
 		String password = "";
