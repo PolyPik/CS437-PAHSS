@@ -7,9 +7,9 @@ import java.util.ArrayList;
 
 public abstract class PAHSSAbstractServer {
 	private ServerSocket s_socket;
-	private ArrayList<Thread> threadlist = new ArrayList<Thread>();
+	private ArrayList<ThreadGroup> tglist = new ArrayList<ThreadGroup>();
 	private ArrayList<AbstractRunnable> runnablelist = new ArrayList<AbstractRunnable>();
-
+	private int client_count = 0;
 	public PAHSSAbstractServer(ServerSocket s_socket) {
 		super();
 		this.s_socket = s_socket;
@@ -23,13 +23,14 @@ public abstract class PAHSSAbstractServer {
 	protected void acceptClient() throws IOException{
 		runnablelist.add(new EchoRunnable(s_socket.accept()));
 		System.out.println("Server accepted client");
-		Thread newThread = new Thread(runnablelist.get(runnablelist.size()-1));
-		threadlist.add(newThread);
-		threadlist.get(threadlist.size()-1).start();
+		ThreadGroup clientTG = new ThreadGroup("client"+client_count);
+		Thread newThread = new Thread(clientTG, runnablelist.get(runnablelist.size()-1));
+		newThread.start();
+		tglist.add(clientTG);
 	}
 	
 	public void closeServer(){
-		try {
+		/*try {
 			for(int i = 0; i < threadlist.size(); i++){
 				runnablelist.get(i).terminate();
 				threadlist.get(i).join();
@@ -41,6 +42,6 @@ public abstract class PAHSSAbstractServer {
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}*/
 	}
 }

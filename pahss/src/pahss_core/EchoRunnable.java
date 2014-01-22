@@ -1,15 +1,17 @@
 package pahss_core;
 
-import java.io.BufferedReader;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.Socket;
 
 public class EchoRunnable extends AbstractRunnable {
 	private Socket c_socket;
-	private PrintWriter out;
-	private BufferedReader in;
+	private DataOutputStream out;
+	private DataInputStream in;
 	private String message;
 	
 	public EchoRunnable(Socket c_socket) {
@@ -20,8 +22,8 @@ public class EchoRunnable extends AbstractRunnable {
 	@Override
 	public void run() {
 		try{
-				out = new PrintWriter(c_socket.getOutputStream(), true);
-				in = new BufferedReader(new InputStreamReader(c_socket.getInputStream()));
+				out = new DataOutputStream(new BufferedOutputStream(c_socket.getOutputStream()));
+				in = new DataInputStream(new BufferedInputStream(c_socket.getInputStream()));
 				while(isRunning){
 					readFromClient();
 					writeToClient();
@@ -36,13 +38,14 @@ public class EchoRunnable extends AbstractRunnable {
 	@Override
 	protected void readFromClient() throws IOException {
 		// TODO Auto-generated method stub
-		message = in.readLine();
+		message = in.readUTF();
 	}
 
 	@Override
 	protected void writeToClient() throws IOException {
 		// TODO Auto-generated method stub
-		out.println("Echo: "+ message);
+		out.writeUTF("Echo: "+message);
+		out.flush();
 	}
 
 }

@@ -32,8 +32,7 @@ public class EchoServer extends PAHSSAbstractServer{
 		
 		try {
 			EchoServer testserv = new EchoServer(portNumber);
-			System.out.println("Server read to accept");
-			
+			System.out.println("Server ready to accept");
 			testserv.acceptClient();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
