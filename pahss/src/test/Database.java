@@ -4,7 +4,7 @@ import java.sql.*;
 public class Database {
 
 	public static void main(String[] args) {
-		String url = "jdbc:mysql://173.247.244.100:3306/asauce5_aquarium";//"jdbc:mysql://localhost/Aquarium";
+		String url = "jdbc:mysql://173.247.244.100:3306/asauce5_aquarium";
 		String username = "asauce5_cs437";
 		String password = "cs437pahss";
 		
