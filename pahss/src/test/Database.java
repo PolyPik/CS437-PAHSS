@@ -20,9 +20,11 @@ public class Database {
 			
 			while(rs.next())
 			{
-				System.out.println(rs.getString("name") + " " + rs.getString("tank_id") + " "
-						+ rs.getString("o2_level") + " " + rs.getString("co2_level") + " "
-						+ rs.getString("hunger_rate")); 
+				System.out.println(rs.getString("name") + " " + rs.getString("oxygen_level") + " "
+						+ rs.getString("nitrite_level") + " " + rs.getString("nitrate_level") + " "
+						+ rs.getString("salinity") + " " + rs.getString("ph_level") + " "
+						+ rs.getString("ammonia_level") + " " + rs.getString("water_hardness") + " "
+						+ rs.getString("temperature")); 
 			}
 			connection.close();
 			System.out.println("\nConnection closed.");
