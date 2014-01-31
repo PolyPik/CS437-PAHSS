@@ -7,9 +7,10 @@ public class TemperatureRegulator {
 	static String username = "asauce5_cs437";
 	static String password = "cs437pahss";
 	private static ArrayList<Fish> tankStock;
+	Heater heater = new Heater();
+	Chiller chiller = new Chiller();
 	
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		testPrintCurrentStock();
 	}
 	
@@ -22,15 +23,14 @@ public class TemperatureRegulator {
 			Fish fish;
 			Connection connection = null;
 			System.out.println("Connecting to Species_Database...");
-			connection = DriverManager.getConnection(url, username,
-					password);
+			connection = DriverManager.getConnection(url, username, password);
 			Statement stmt = connection.createStatement();
 			String query = "select * from Species_Database";
 			ResultSet rs = stmt.executeQuery(query);
 			
 			while(rs.next())
 			{
-				fish = new Fish(rs.getString("name"), rs.getDouble("oxygen_level"),
+				fish = new Fish(rs.getInt("id"), rs.getString("name"), rs.getDouble("oxygen_level"),
 						rs.getDouble("nitrite_level"),rs.getDouble("nitrate_level"),
 						rs.getDouble("salinity"), rs.getDouble("ph_level"),
 						rs.getDouble("ammonia_level"), rs.getDouble("water_hardness"),
@@ -66,7 +66,6 @@ public class TemperatureRegulator {
 	{
 		
 	}
-	
 	public static double calculateOptimalTemperature()
 	{
 		return 1;

@@ -1,16 +1,35 @@
 package test;
+import java.awt.Graphics;
 
 public class Fish {
 	private double o2Level; private double nitriteLevel; private double nitrateLevel; 
 	private double salinity; private double phLevel; private double ammoniaLevel; 
-	private double waterHardness; private double temperature; private String name;
-	
+	private double waterHardness; private double temperature; private String name; private int id;
+	private boolean isAlive; private int x = 20; private int y = 20; private int radius = 30; 
+	private int dx = 1; private int dy = 1;
 
-	public Fish(String n, double o2, double niLevel, double naLevel, double sal, double ph, double ammonia,
+	public Fish(int id, String n, double o2, double niLevel, double naLevel, double sal, double ph, double ammonia,
 			double water, double temp)
 	{
-		name = n; o2Level = o2; nitriteLevel = niLevel; nitrateLevel = naLevel; salinity = sal;
-		phLevel = ph; ammoniaLevel = ammonia; waterHardness = water; temperature = temp;
+		isAlive = true;
+		this.id = id; name = n; o2Level = o2; nitriteLevel = niLevel; nitrateLevel = naLevel; 
+		salinity = sal; phLevel = ph; ammoniaLevel = ammonia; waterHardness = water; temperature = temp;
+	}
+	public Fish()
+	{
+		isAlive=true;
+	}
+	public boolean getAlive(){
+		return isAlive;
+	}
+	public void setAlive(boolean alive){
+		isAlive = alive;
+	}
+	public int getId(){
+		return id;
+	}
+	public void setId(int id) {
+		this.id = id;
 	}
 	public String getName() {
 		return name;
@@ -66,10 +85,28 @@ public class Fish {
 	public void setTemperature(double temperature) {
 		this.temperature = temperature;
 	}
-	
+	public void Draw(Graphics g)
+	{
+		g.fillRect(x - 10, y + 7, 20, 15);
+		g.fillOval(x, y, radius, radius);
+	}
+	public void Update(double dt)
+	{
+		x += dx; y += dy;
+		
+		if (x < 1)
+            dx = 1;
+        if (x + radius > 600)
+        	dx *= -1;
+        if (y < 1)
+        	dy = 1;
+        if (y + radius > 400)
+        	dy *= -1;
+	}
 	@Override public String toString(){
-		return (name+ " " + o2Level + " " + nitriteLevel + " " + nitrateLevel + " "
+		return (id + " " + name + " " + o2Level + " " + nitriteLevel + " " + nitrateLevel + " "
 				+ salinity + " " + phLevel + " " + ammoniaLevel + " " + waterHardness + " "
 				+ temperature); 
 	}
+	
 }
