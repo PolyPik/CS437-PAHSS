@@ -1,5 +1,7 @@
 package test;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 public class TankSim extends JFrame{
 
@@ -11,8 +13,8 @@ public class TankSim extends JFrame{
         frame.setResizable(false);
 
         TankPanel p = new TankPanel();
-
-        frame.getContentPane().add(p);
+        
+        frame.getContentPane().add(p.getMainPanel());
         frame.pack();
         frame.setVisible(true);
 	}

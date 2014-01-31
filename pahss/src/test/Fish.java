@@ -5,7 +5,7 @@ public class Fish {
 	private double o2Level; private double nitriteLevel; private double nitrateLevel; 
 	private double salinity; private double phLevel; private double ammoniaLevel; 
 	private double waterHardness; private double temperature; private String name; private int id;
-	private boolean isAlive; private int x = 20; private int y = 20; private int radius = 30; 
+	private boolean isAlive; private int x = 50; private int y = 50; private int radius = 30; 
 	private int dx = 1; private int dy = 1;
 
 	public Fish(int id, String n, double o2, double niLevel, double naLevel, double sal, double ph, double ammonia,
