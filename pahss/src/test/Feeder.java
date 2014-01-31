@@ -8,14 +8,9 @@ package test;
 public class Feeder {
 
 	private boolean isOperational = true;
-	private boolean isFull = true;
-	private String errorMessageIfEmpty = "Feeder malfunction! Out of food! Refill immediately!";
-	private String errorMessageIfBroken = "Feeder malfunction! Equipment is broken! Fix immediately!";
-
-	// real-time readings?
-	public void realTimeReadings() {
-		System.out.println("Food level at 100%. Machine working.");
-	}
+	private boolean hasFood = true;
+	private String lowSupplyErrorNotice = "Feeder malfunction! Out of food! Refill immediately!";
+	private String operationalErrorNotice = "Feeder malfunction! Equipment is broken! Fix immediately!";
 
 	// check whether this equipment is working
 	public boolean getOperationalStatus() {
@@ -27,21 +22,21 @@ public class Feeder {
 	}
 
 	// check whether feeder has food
-	boolean getIsFull() {
-		return this.isFull;
+	boolean getFoodSupplyStatus() {
+		return this.hasFood;
 	}
 
-	public void setIsFull(boolean isFull) {
-		this.isFull = isFull;
-	}
-
-	// Error message that will be sent to MI
-	public String getErrorMessageIfEmpty() {
-		return this.errorMessageIfEmpty;
+	public void setFoodSupplyStatus(boolean hasFood) {
+		this.hasFood = hasFood;
 	}
 
 	// Error message that will be sent to MI
-	public String getErrorMessageIfBroken() {
-		return this.errorMessageIfBroken;
+	public String getLowSupplyErrorNotice() {
+		return this.lowSupplyErrorNotice;
+	}
+
+	// Error message that will be sent to MI
+	public String getOperationalErrorNotice() {
+		return this.operationalErrorNotice;
 	}
 }

@@ -43,20 +43,20 @@ public class EquipmentMonitor {
 		while (!isCorrectInput) {
 			int oneOrZero = input.nextInt();
 			if (oneOrZero == 1) {
-				feeder.setIsFull(true);
+				feeder.setFoodSupplyStatus(true);
 				isCorrectInput = true;
 			} else if (oneOrZero == 0) {
-				feeder.setIsFull(false);
+				feeder.setFoodSupplyStatus(false);
 				isCorrectInput = true;
 			} else
 				System.out.println("Invalid input. Please input a 1 or a 0:");
 		}
 
-		if (feeder.getIsFull())
+		if (feeder.getFoodSupplyStatus())
 			System.out.println("Feeder is working.");
 		else {
 			System.out.println("Faulty Equipment Detected;");
-			monitor.sendInfo(feeder.getErrorMessageIfEmpty());
+			monitor.sendInfo(feeder.getLowSupplyErrorNotice());
 		}
 	}
 }
