@@ -30,7 +30,6 @@ public class EquipmentMonitor {
 
 		Scanner input = new Scanner(System.in);
 		System.out.println("Enter either 1 or 0");
-		boolean isCorrectInput = false;
 
 		/*
 		 * This is a way to test the true/false case. Need to be able to
@@ -40,23 +39,24 @@ public class EquipmentMonitor {
 		 * equipment individually instead of having a single loop for all
 		 * equipment.
 		 */
-		while (!isCorrectInput) {
+		while (true) {
+			System.out.println("Please input a 1 or a 0: ");
 			int oneOrZero = input.nextInt();
 			if (oneOrZero == 1) {
 				feeder.setFoodSupplyStatus(true);
-				isCorrectInput = true;
 			} else if (oneOrZero == 0) {
 				feeder.setFoodSupplyStatus(false);
-				isCorrectInput = true;
 			} else
-				System.out.println("Invalid input. Please input a 1 or a 0:");
+				System.out.println("Invalid input.");
+			if (oneOrZero == 0 || oneOrZero == 1) {
+				if (feeder.getFoodSupplyStatus())
+					System.out.println("Feeder is working.");
+				else {
+					System.out.println("Faulty Equipment Detected;");
+					monitor.sendInfo(feeder.getLowSupplyErrorNotice());
+				}
+			}
 		}
 
-		if (feeder.getFoodSupplyStatus())
-			System.out.println("Feeder is working.");
-		else {
-			System.out.println("Faulty Equipment Detected;");
-			monitor.sendInfo(feeder.getLowSupplyErrorNotice());
-		}
 	}
 }
