@@ -1,15 +1,20 @@
 package test;
+import java.awt.Dimension;
+
 import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
 
 public class TankSim extends JFrame{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	public static void main(String[] args) {
 		JFrame frame = new JFrame("Tank");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        frame.setLocation(400,400);
+        frame.setPreferredSize(new Dimension(600,400));
+        frame.setLocation(200,200);
         frame.setResizable(false);
 
         TankPanel p = new TankPanel();
