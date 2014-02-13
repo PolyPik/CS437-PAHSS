@@ -1,15 +1,18 @@
 package test;
 
 import java.util.Scanner;
+import java.util.ArrayList;
 
-public class EquipmentMonitorThread extends Thread {
+public class EquipmentCheck extends Thread {
 
 	String equipment;
 	String error;
-
+	int tank_id;
+	int equipment_id;
 	boolean isOperational = true;
+	boolean isChecked = false;
 
-	EquipmentMonitorThread(String equipmentName, String errorNotice) {
+	EquipmentCheck(String equipmentName, String errorNotice) {
 		equipment = equipmentName;
 		error = errorNotice;
 	}
@@ -20,6 +23,14 @@ public class EquipmentMonitorThread extends Thread {
 
 	public boolean getOperational() {
 		return isOperational;
+	}
+
+	public void setChecked(boolean r) {
+		isChecked = r;
+	}
+
+	public boolean getChecked() {
+		return isChecked;
 	}
 
 	public void run() {
@@ -36,17 +47,21 @@ public class EquipmentMonitorThread extends Thread {
 			 * be sent to MI. Otherwise, print out that everything is fine. More
 			 * work on this is needed.
 			 */
-			if (getOperational())
-				System.out.println(equipment + " is working fine. ");
-			else
+
+			if (!getOperational() && !isChecked) {
 				System.out.println("ERROR: " + equipment + " malfunction: "
 						+ error);
-
-			try {
-				sleep(5000);
-			} catch (InterruptedException e) {
-				System.out.println("sleep(5000) did not work");
+				setChecked(true);
 			}
+			if (getOperational() && isChecked) {
+				setChecked(false);
+				System.out.println("Error has been fixed on " + equipment);
+			}
+
+			/*
+			 * try { sleep(5000); } catch (InterruptedException e) {
+			 * System.out.println("sleep(5000) did not work"); }
+			 */
 		}
 	}
 
@@ -65,20 +80,19 @@ public class EquipmentMonitorThread extends Thread {
 		 * a value is false, an error message will be printed and sent to the
 		 * MI.
 		 */
-		EquipmentMonitorThread feederMonitor = new EquipmentMonitorThread(
-				"Feeder 1", "Out of food! Refill immediately!");
-		EquipmentMonitorThread feeder2Monitor = new EquipmentMonitorThread(
-				"Feeder 2", "Equipment is broken! Fix immediately!");
 
-		feederMonitor.start();
-		feeder2Monitor.start();
+		ArrayList<EquipmentCheck> equipmentCheckList = new ArrayList<EquipmentCheck>();
 
-		/*
-		 * if we take the database approach, this might be where the code would
-		 * end, as the rest of the code is just designed to switch booleans.
-		 */
+		for (int t = 1; t <= 2; t++) {
+			for (int e = 1; e <= 19; e++) {
+				equipmentCheckList.add(new EquipmentCheck("Feeder of tank "
+						+ t + " Equipment ID " + e,
+						"Equipment is broken! Fix immediately"));
+			}
+		}
 
-		Scanner input = new Scanner(System.in);
+		for (int i = 0; i < equipmentCheckList.size(); i++)
+			equipmentCheckList.get(i).start();
 
 		/*
 		 * This is a way to test the true/false case. Need to be able to
@@ -88,17 +102,21 @@ public class EquipmentMonitorThread extends Thread {
 		 * equipment id, and based on those id's, the corresponding tank will
 		 * have its boolean set to false.
 		 */
+		Scanner input = new Scanner(System.in);
+
+		System.out.println("Input numbers 0-?");
 		while (true) {
-			System.out.println("Enter an integer 0-3: ");
-			int zeroThroughFour = input.nextInt();
-			if (zeroThroughFour == 1)
-				feederMonitor.setOperational(false);
-			if (zeroThroughFour == 0)
-				feederMonitor.setOperational(true);
-			if (zeroThroughFour == 3)
-				feeder2Monitor.setOperational(false);
-			if (zeroThroughFour == 2)
-				feeder2Monitor.setOperational(true);
+			int boolSwitch = input.nextInt();
+			if (boolSwitch >= 0 && boolSwitch < equipmentCheckList.size()) {
+				equipmentCheckList.get(boolSwitch).setOperational(
+						!equipmentCheckList.get(boolSwitch).getOperational());
+			}
 		}
+
+		/*
+		 * The logic for this is nearly complete. This program needs to handle the case for when new tanks/equipment are added. 
+		 * For each new tank, 19 new equipment checks are added.
+		 */
 	}
 }
+
