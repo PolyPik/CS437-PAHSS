@@ -16,7 +16,7 @@ public class TankPanel extends JPanel{
 	private JPanel controlPanel = new JPanel();
 	private JPanel mainPanel = new JPanel();
 	private JTabbedPane jtp = new JTabbedPane();
-	private TemperatureRegulator tr = new TemperatureRegulator();
+	private TempPanel tr = new TempPanel();
 	
 	public TankPanel()
 	{

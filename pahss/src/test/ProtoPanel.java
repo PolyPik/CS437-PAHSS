@@ -92,7 +92,7 @@ public class ProtoPanel {
 		JPanel CRPanel = new JPanel();
 		MainPanel.addTab("Chemistry", null, CRPanel, null);
 		
-		JPanel TRPanel = new JPanel();
+		TempPanel TRPanel = new TempPanel(); 
 		MainPanel.addTab("Temperature", null, TRPanel, null);
 		
 		JPanel FRPanel = new JPanel();

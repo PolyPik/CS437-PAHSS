@@ -1,67 +1,23 @@
 package test;
 
-import java.awt.Dimension;
-import java.awt.GridLayout;
 import java.sql.*;
 import java.util.ArrayList;
 
-import javax.swing.*;
 
-public class TemperatureRegulator extends JPanel{
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+public class TemperatureRegulator{
+	
 	static String url = "jdbc:mysql://173.247.244.100:3306/asauce5_aquarium";
 	static String username = "asauce5_cs437";
 	static String password = "cs437pahss";
 	private static ArrayList<Fish> tankStock;
 	private Heater heater = new Heater();
 	private Chiller chiller = new Chiller();
-	private JLabel optimalTempLabel = new JLabel("Optimal Temperature: ");
-	private JLabel optimalTempValue = new JLabel("83");
-	private JLabel tempLabel = new JLabel("Current Temperature: ");
-	private JLabel tempValue = new JLabel("80");
-	private JButton tempUpButton = new JButton("Up");
-	private JButton tempDownButton = new JButton("Down");
-	private JRadioButton heaterOn = new JRadioButton("Heater On");
-	private JRadioButton heaterOff = new JRadioButton("Heater Off");
-	private JRadioButton chillerOn = new JRadioButton("Chiller On");
-	private JRadioButton chillerOff = new JRadioButton("Chiller Off");
-	private ButtonGroup heaterGroup = new ButtonGroup();
-	private ButtonGroup chillerGroup = new ButtonGroup();
-	private JPanel tempPanel = new JPanel();
-	private JPanel controlPanel = new JPanel();
+	private int opTemp = 50;
+	private int curTemp = 55;
 	
 	public TemperatureRegulator()
 	{
-		setLayout(new GridLayout(6, 2, 0, 0));
-		setPreferredSize(new Dimension(100, 100));
-		setFocusable(true);
 		
-		heaterOff.setSelected(true);
-		chillerOff.setSelected(true);
-		heaterGroup.add(heaterOn);
-		heaterGroup.add(heaterOff);
-		chillerGroup.add(chillerOn);
-		chillerGroup.add(chillerOff);
-		
-		tempPanel.setBorder(BorderFactory.createTitledBorder("Temperature Controls"));
-		tempPanel.add(optimalTempLabel);
-		tempPanel.add(optimalTempValue);
-		tempPanel.add(tempLabel);
-		tempPanel.add(tempValue);
-		tempPanel.add(tempUpButton);
-		tempPanel.add(tempDownButton);
-		
-		controlPanel.setBorder(BorderFactory.createTitledBorder("Equipment Controls"));
-		controlPanel.add(heaterOn);
-		controlPanel.add(heaterOff);
-		controlPanel.add(chillerOn);
-		controlPanel.add(chillerOff);
-		
-		add(tempPanel);
-		add(controlPanel);
 	}
 	
 	public static ArrayList<Fish> getSpeciesData()
@@ -136,25 +92,35 @@ public class TemperatureRegulator extends JPanel{
 		
 		return tStock;
 	}
-	public static double getTemperature()
+	public void update()
+	{
+		while(chiller.isOn() || heater.isOn()){
+			adjustTemperature();
+		}
+		
+	}
+	public double getTemperature()
 	{
 		return 0;
 	}
-	public static void sendCommands()
+	public void sendCommands()
 	{
 		
 	}
-	public static void sendActions()
+	public void sendActions()
 	{
 		
 	}
-	public static double calculateOptimalTemperature()
+	public double calculateOptimalTemperature()
 	{
 		return 1;
 	}
-	public static void adjustTemperature(double amount)
+	public void adjustTemperature()
 	{
-		
+		if (curTemp < opTemp)
+			setHeater(true);
+		else
+			setChiller(true);
 	}
 	public Chiller getChiller()
 	{
@@ -172,19 +138,19 @@ public class TemperatureRegulator extends JPanel{
 	{
 		heater.setOn(onOrOff);
 	}
-	public static void sendDataToMI()
+	public void sendDataToMI()
 	{
 		
 	}
-	public static void sendSettingsToMI()
+	public void sendSettingsToMI()
 	{
 		
 	}
-	public static void sendNoticesToMI()
+	public void sendNoticesToMI()
 	{
 		
 	}
-	public static void testPrintCurrentStock()
+	public void testPrintCurrentStock()
 	{
 		tankStock = getSpeciesData();
 		
