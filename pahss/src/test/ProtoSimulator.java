@@ -11,8 +11,8 @@ public class ProtoSimulator extends JFrame{
 	 */
 	private static final long serialVersionUID = 1L;
 	private boolean isRunning = true;
-	private int fps = 60;
-	int x = 0; int temp = 60;
+	private int fps = 20;
+	int x = 0;
 	TemperatureRegulator tr = new TemperatureRegulator();
 	
 	public static void main(String[] args) {

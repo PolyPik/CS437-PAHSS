@@ -12,8 +12,8 @@ public class TemperatureRegulator{
 	private static ArrayList<Fish> tankStock;
 	private Heater heater = new Heater();
 	private Chiller chiller = new Chiller();
-	private int opTemp = 50;
-	private int curTemp = 55;
+	private float opTemp = 50;
+	private float curTemp = 55;
 	
 	public TemperatureRegulator()
 	{
@@ -94,8 +94,23 @@ public class TemperatureRegulator{
 	}
 	public void update()
 	{
-		while(chiller.isOn() || heater.isOn()){
-			adjustTemperature();
+		if((int)curTemp != (int)opTemp)
+		{
+			if ((int)curTemp < (int)opTemp){
+				if(!heater.isOn()){
+					setHeater(true);
+					setChiller(false);
+				}
+			}
+			else{
+				if(!chiller.isOn()){
+					setChiller(true);
+					setHeater(false);
+				}
+			}
+			if(chiller.isOn() || heater.isOn()){
+				adjustTemperature();
+			}
 		}
 		
 	}
@@ -117,10 +132,15 @@ public class TemperatureRegulator{
 	}
 	public void adjustTemperature()
 	{
-		if (curTemp < opTemp)
-			setHeater(true);
-		else
-			setChiller(true);
+		if (curTemp < opTemp){
+			if (heater.isOn())
+				curTemp+= .1;
+		}
+		else{
+			if (chiller.isOn())
+				curTemp -= .1;
+		}
+		System.out.println("Adjusting Temp: " + curTemp);
 	}
 	public Chiller getChiller()
 	{
