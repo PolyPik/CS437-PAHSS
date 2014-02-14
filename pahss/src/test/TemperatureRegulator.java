@@ -2,6 +2,7 @@ package test;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 
 public class TemperatureRegulator{
@@ -9,7 +10,7 @@ public class TemperatureRegulator{
 	static String url = "jdbc:mysql://173.247.244.100:3306/asauce5_aquarium";
 	static String username = "asauce5_cs437";
 	static String password = "cs437pahss";
-	private static ArrayList<Fish> tankStock;
+	private ArrayList<Fish> tankStock;
 	private Heater heater = new Heater();
 	private Chiller chiller = new Chiller();
 	private float opTemp = 50;
@@ -20,7 +21,7 @@ public class TemperatureRegulator{
 		
 	}
 	
-	public static ArrayList<Fish> getSpeciesData()
+	public ArrayList<Fish> getSpeciesData()
 	{
 		ArrayList<Fish> tStock = new ArrayList<Fish>();
 		
@@ -50,13 +51,13 @@ public class TemperatureRegulator{
 		}
 		catch(SQLException s)
 		{
-			System.out.println("\nNo Connection.");
+			System.out.println("\nMySQL error.");
 			System.out.println(s);
 		}
 		
 		return tStock;
 	}
-	public static ArrayList<Fish> getTankStock()
+	public ArrayList<Fish> getTankStock()
 	{
 		ArrayList<Fish> tStock = new ArrayList<Fish>();
 		
@@ -86,7 +87,7 @@ public class TemperatureRegulator{
 		}
 		catch(SQLException s)
 		{
-			System.out.println("\nNo Connection.");
+			System.out.println("\nMySQL error.");
 			System.out.println(s);
 		}
 		
@@ -112,23 +113,50 @@ public class TemperatureRegulator{
 				adjustTemperature();
 			}
 		}
+		else
+		{
+			if(heater.isOn())
+				heater.setOn(false);
+			if(chiller.isOn())
+				chiller.setOn(false);
+		}
 		
 	}
-	public double getTemperature()
+	public void getTemperature()
 	{
-		return 0;
+		//access database to get current tank temperature
 	}
-	public void sendCommands()
+	public void sendActions(String action)
 	{
+		java.util.Date now = new java.util.Date();
+		java.sql.Date sqlDate = new java.sql.Date(now.getTime());
+		Calendar c = Calendar.getInstance();
 		
+		try
+		{
+			Connection connection = null;
+			System.out.println("Connecting to tank_stock...");
+			connection = DriverManager.getConnection(url, username, password);
+			Statement stmt = connection.createStatement();
+			String insert = "insert into action_log (module_id, time_stamp, action_taken) values ("
+				+ 4 + "," +"'" + sqlDate
+				+ " " + c.get(Calendar.HOUR_OF_DAY) + ":" + c.get(Calendar.MINUTE) + ":" + c.get(Calendar.SECOND) 
+				+ "'" + "," + "'" + action + "'"  +")";
+			stmt.executeUpdate(insert);
+			
+			connection.close();
+			System.out.println("Action logged.");
+			System.out.println("Connection closed.");
+		}
+		catch(SQLException s)
+		{
+			System.out.println("\nMySQL error.");
+			System.out.println(s);
+		}
 	}
-	public void sendActions()
+	public void calculateOptimalTemperature()
 	{
-		
-	}
-	public double calculateOptimalTemperature()
-	{
-		return 1;
+		//calculate op temp and save it to database
 	}
 	public void adjustTemperature()
 	{
@@ -136,11 +164,11 @@ public class TemperatureRegulator{
 			if (heater.isOn())
 				curTemp+= .1;
 		}
-		else{
+		else if (curTemp > opTemp){
 			if (chiller.isOn())
 				curTemp -= .1;
 		}
-		System.out.println("Adjusting Temp: " + curTemp);
+		System.out.printf("Adjusting Temp: %.1f%n", curTemp);
 	}
 	public Chiller getChiller()
 	{
@@ -149,6 +177,7 @@ public class TemperatureRegulator{
 	public void setChiller(boolean onOrOff)
 	{
 		chiller.setOn(onOrOff);
+		sendActions("Chiller turned " + (onOrOff ? "on" : "off"));
 	}
 	public Heater getHeater()
 	{
@@ -157,6 +186,7 @@ public class TemperatureRegulator{
 	public void setHeater(boolean onOrOff)
 	{
 		heater.setOn(onOrOff);
+		sendActions("Heater turned " + (onOrOff ? "on" : "off"));
 	}
 	public void sendDataToMI()
 	{
@@ -181,4 +211,5 @@ public class TemperatureRegulator{
 		}
 		
 	}
+
 }

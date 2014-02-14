@@ -14,6 +14,8 @@ public class ProtoSimulator extends JFrame{
 	private int fps = 20;
 	int x = 0;
 	TemperatureRegulator tr = new TemperatureRegulator();
+	long lastLoopTime = 0;
+	long refreshTime = 0;
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -27,13 +29,14 @@ public class ProtoSimulator extends JFrame{
 		initialize();
 		while (isRunning){
 			long time = System.currentTimeMillis(); 
+	        long delta = time - lastLoopTime;
+	        lastLoopTime = System.currentTimeMillis();
 	        
-	        update(); 
+	        update(delta); 
 	        draw(); 
 	        
 	        //  delay for each frame  -   time it took for one frame 
 	        time = (1000 / fps) - (System.currentTimeMillis() - time); 
-	        
 	        if (time > 0) 
             { 
                 try 
@@ -54,9 +57,14 @@ public class ProtoSimulator extends JFrame{
         setVisible(true); 
         
 	}
-	void update()
+	void update(long dt)
 	{
-		tr.update();
+		refreshTime += dt;
+		if (refreshTime > 1000) // update TR once a second only
+		{
+			tr.update();
+			refreshTime = 0;
+		}
 	}
 	void draw()
 	{
