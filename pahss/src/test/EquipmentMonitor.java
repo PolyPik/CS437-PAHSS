@@ -4,24 +4,18 @@ import java.util.Scanner;
 import java.util.ArrayList;
 
 public class EquipmentMonitor {
-	ArrayList<EquipmentCheck> equipmentListing = new ArrayList<EquipmentCheck>();
+	ArrayList<EquipmentCheck> equipmentCheckList = new ArrayList<EquipmentCheck>();
 
-	public ArrayList<EquipmentCheck> getEquipmentList() {
-		return equipmentListing;
+	public ArrayList<EquipmentCheck> getCheckList() {
+		return equipmentCheckList;
 	}
 
-	public void addToEquipmentList(EquipmentCheck e) {
-		equipmentListing.add(e);
+	public void addToCheckList(EquipmentCheck e) {
+		equipmentCheckList.add(e);
 	}
-	
-	public void setEquipmentList(ArrayList<EquipmentCheck> e){
-		equipmentListing = e;
-	}
-
 }
 
 class EquipmentCheck extends Thread {
-
 	String equipmentName;
 	String errorNotice;
 	int tank_id;
@@ -85,13 +79,14 @@ class EquipmentCheck extends Thread {
 	public static void main(String[] args) {
 
 		/*
-		 * Each new EquipmentMonitorThread represents a piece of equipment, and
-		 * each one will correspond to a different entry in the database to be
-		 * created. When we implement the database, these objects will also take
-		 * in the tank_id and the equipment_id of the equipment they represent.
-		 * These values will correspond to a boolean value that will have a
-		 * value of either true or false. This value will be changed by the
-		 * other modules whenever equipment malfunctions, by referencing the
+		 * The EquipmentMonitor class has an ArrayList equipmentCheckList. The
+		 * main method of EquipmenentCheck will create an object of type
+		 * EquipmentMonitor, and proceed to add elements to it of type
+		 * EquipmentCheck. When we implement the database, these objects will
+		 * also take in the tank_id and the equipment_id of the equipment they
+		 * represent. These values will correspond to a boolean value that will
+		 * have a value of either true or false. This value will be changed by
+		 * the other modules whenever equipment malfunctions, by referencing the
 		 * table based on the specific tank_id and equipment_id of the equipment
 		 * and tank that malfunctioned. During the object's run method, whenever
 		 * a value is false, an error message will be printed and sent to the
@@ -100,15 +95,16 @@ class EquipmentCheck extends Thread {
 
 		EquipmentMonitor monitor = new EquipmentMonitor();
 
-		for (int t = 1; t <= 2; t++) {
+		for (int t = 1; t <= 3; t++) {
 			for (int e = 1; e <= 19; e++)
-				monitor.getEquipmentList().add(new EquipmentCheck("Equipment of Tank "
-						+ t + " Equipment ID " + e,
-						"Equipment is broken! Fix immediately"));
+				monitor.getCheckList().add(
+						new EquipmentCheck("Equipment of Tank " + t
+								+ " Equipment ID " + e,
+								"Equipment is broken! Fix immediately"));
 		}
 
-		for (int i = 0; i < monitor.getEquipmentList().size(); i++)
-			monitor.getEquipmentList().get(i).start();
+		for (int i = 0; i < monitor.getCheckList().size(); i++)
+			monitor.getCheckList().get(i).start();
 
 		/*
 		 * This is a way to test the true/false case. Need to be able to
@@ -123,9 +119,12 @@ class EquipmentCheck extends Thread {
 		System.out.println("Input numbers 0-?");
 		while (true) {
 			int boolSwitch = input.nextInt();
-			if (boolSwitch >= 0 && boolSwitch < monitor.getEquipmentList().size())
-				monitor.getEquipmentList().get(boolSwitch).setOperational(
-						!monitor.getEquipmentList().get(boolSwitch).getOperational());
+			if (boolSwitch >= 0 && boolSwitch < monitor.getCheckList().size())
+				monitor.getCheckList()
+						.get(boolSwitch)
+						.setOperational(
+								!monitor.getCheckList().get(boolSwitch)
+										.getOperational());
 		}
 
 		/*
