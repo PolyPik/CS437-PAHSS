@@ -3,30 +3,47 @@ package test;
 import java.util.Scanner;
 import java.util.ArrayList;
 
-public class EquipmentCheck extends Thread {
+public class EquipmentMonitor {
+	ArrayList<EquipmentCheck> equipmentListing = new ArrayList<EquipmentCheck>();
 
-	String equipment;
-	String error;
+	public ArrayList<EquipmentCheck> getEquipmentList() {
+		return equipmentListing;
+	}
+
+	public void addToEquipmentList(EquipmentCheck e) {
+		equipmentListing.add(e);
+	}
+	
+	public void setEquipmentList(ArrayList<EquipmentCheck> e){
+		equipmentListing = e;
+	}
+
+}
+
+class EquipmentCheck extends Thread {
+
+	String equipmentName;
+	String errorNotice;
 	int tank_id;
 	int equipment_id;
 	boolean isOperational = true;
 	boolean isChecked = false;
 
 	EquipmentCheck(String equipmentName, String errorNotice) {
-		equipment = equipmentName;
-		error = errorNotice;
+		this.equipmentName = equipmentName;
+		this.errorNotice = errorNotice;
 	}
 
-	public void setOperational(boolean o) {
-		isOperational = o;
+	public void setOperational(boolean operational) {
+		this.isOperational = operational;
 	}
 
 	public boolean getOperational() {
 		return isOperational;
 	}
 
-	public void setChecked(boolean r) {
-		isChecked = r;
+	public void setChecked(boolean checked) {
+		this.isChecked = checked;
 	}
 
 	public boolean getChecked() {
@@ -49,13 +66,13 @@ public class EquipmentCheck extends Thread {
 			 */
 
 			if (!getOperational() && !isChecked) {
-				System.out.println("ERROR: " + equipment + " malfunction: "
-						+ error);
+				System.out.println("ERROR: " + equipmentName + " malfunction: "
+						+ errorNotice);
 				setChecked(true);
 			}
 			if (getOperational() && isChecked) {
 				setChecked(false);
-				System.out.println("Error has been fixed on " + equipment);
+				System.out.println("Error has been fixed on " + equipmentName);
 			}
 
 			/*
@@ -81,18 +98,17 @@ public class EquipmentCheck extends Thread {
 		 * MI.
 		 */
 
-		ArrayList<EquipmentCheck> equipmentCheckList = new ArrayList<EquipmentCheck>();
+		EquipmentMonitor monitor = new EquipmentMonitor();
 
 		for (int t = 1; t <= 2; t++) {
-			for (int e = 1; e <= 19; e++) {
-				equipmentCheckList.add(new EquipmentCheck("Feeder of tank "
+			for (int e = 1; e <= 19; e++)
+				monitor.getEquipmentList().add(new EquipmentCheck("Equipment of Tank "
 						+ t + " Equipment ID " + e,
 						"Equipment is broken! Fix immediately"));
-			}
 		}
 
-		for (int i = 0; i < equipmentCheckList.size(); i++)
-			equipmentCheckList.get(i).start();
+		for (int i = 0; i < monitor.getEquipmentList().size(); i++)
+			monitor.getEquipmentList().get(i).start();
 
 		/*
 		 * This is a way to test the true/false case. Need to be able to
@@ -107,16 +123,15 @@ public class EquipmentCheck extends Thread {
 		System.out.println("Input numbers 0-?");
 		while (true) {
 			int boolSwitch = input.nextInt();
-			if (boolSwitch >= 0 && boolSwitch < equipmentCheckList.size()) {
-				equipmentCheckList.get(boolSwitch).setOperational(
-						!equipmentCheckList.get(boolSwitch).getOperational());
-			}
+			if (boolSwitch >= 0 && boolSwitch < monitor.getEquipmentList().size())
+				monitor.getEquipmentList().get(boolSwitch).setOperational(
+						!monitor.getEquipmentList().get(boolSwitch).getOperational());
 		}
 
 		/*
-		 * The logic for this is nearly complete. This program needs to handle the case for when new tanks/equipment are added. 
-		 * For each new tank, 19 new equipment checks are added.
+		 * The logic for this is nearly complete. This program needs to handle
+		 * the case for when new tanks/equipment are added. For each new tank,
+		 * 19 new equipment checks are added.
 		 */
 	}
 }
-
