@@ -94,8 +94,11 @@ class EquipmentCheck extends Thread {
 		 */
 
 		EquipmentMonitor monitor = new EquipmentMonitor();
+		Scanner input = new Scanner(System.in);
+		System.out.println("Enter the number of tanks (preferably 1-3):");
+		int numberOfTanks = input.nextInt();
 
-		for (int t = 1; t <= 3; t++) {
+		for (int t = 1; t <= numberOfTanks; t++) {
 			for (int e = 1; e <= 19; e++)
 				monitor.getCheckList().add(
 						new EquipmentCheck("Equipment of Tank " + t
@@ -114,9 +117,9 @@ class EquipmentCheck extends Thread {
 		 * equipment id, and based on those id's, the corresponding tank will
 		 * have its boolean set to false.
 		 */
-		Scanner input = new Scanner(System.in);
 
-		System.out.println("Input numbers 0-?");
+		System.out.println("All equipment currently working.");
+		System.out.println("Input numbers 0 through " + (numberOfTanks * 19 - 1) + " to break/fix equipment and display error/fix message:");
 		while (true) {
 			int boolSwitch = input.nextInt();
 			if (boolSwitch >= 0 && boolSwitch < monitor.getCheckList().size())
