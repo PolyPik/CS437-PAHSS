@@ -8,12 +8,19 @@ import java.util.Collections;
 public abstract class SCHEntry {
 	Scheduler starter;
 	Scheduler stopper;
+	StringBuilder start_calendar;
+	StringBuilder stop_calendar;
 	ArrayList<SCHInterval> interval_list;
+	boolean hasStarted= false;
+	String start_taskid;
+	String stop_taskid;
 	
 	public SCHEntry(){
 		interval_list = new ArrayList<SCHInterval>();
 		starter = new Scheduler();
 		stopper = new Scheduler();
+		start_calendar = new StringBuilder();
+		stop_calendar = new StringBuilder();
 	}
 	
 	public void addInterval(int hour1, int minute1, int hour2, int minute2){
@@ -34,6 +41,29 @@ public abstract class SCHEntry {
 		interv.setStarttime(hour1, minute1);
 		interv.setStoptime(hour2, minute2);
 		Collections.sort(interval_list);
+	}
+	
+	public void applyCalendar(){
+		if(start_calendar.length()>0){
+			start_calendar.delete(0, start_calendar.length());
+		}
+		
+		if(stop_calendar.length()>0){
+			stop_calendar.delete(0, stop_calendar.length());
+		}
+		
+		for(int i = 0; i < interval_list.size(); i++){
+			start_calendar.append(interval_list.get(i).getStart_minute());
+			start_calendar.append(interval_list.get(i).getStart_hour());
+			start_calendar.append(" * * *");
+			stop_calendar.append(interval_list.get(i).getStop_minute());
+			stop_calendar.append(interval_list.get(i).getStop_hour());
+			stop_calendar.append(" * * *");
+			if(i!=(interval_list.size()-1)){
+				start_calendar.append("|");
+				stop_calendar.append("|");
+			}
+		}
 	}
 	
 	public void startSchedulers(){

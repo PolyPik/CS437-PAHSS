@@ -65,11 +65,36 @@ public class SCHInterval implements Comparable<SCHInterval>{
 		
 		return start_val1-start_val2;
 	}
-	
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + start_hour;
+		result = 17 * result + start_minute;
+		result = 43 * result + stop_hour;
+		result = 5 * result + stop_minute;
+		return result;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
-		// TODO Auto-generated method stub
-		
-		return super.equals(obj);
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (!(obj instanceof SCHInterval))
+			return false;
+		SCHInterval other = (SCHInterval) obj;
+		if (start_hour != other.start_hour)
+			return false;
+		if (start_minute != other.start_minute)
+			return false;
+		if (stop_hour != other.stop_hour)
+			return false;
+		if (stop_minute != other.stop_minute)
+			return false;
+		return true;
 	}
+
 }
