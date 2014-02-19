@@ -1,13 +1,12 @@
 package sch;
 
-public class SCHInterval {
+public class SCHInterval implements Comparable<SCHInterval>{
 	private int start_hour;
 	private int start_minute;
 	private int stop_hour;
 	private int stop_minute;
 	
 	public SCHInterval() {
-		// TODO Auto-generated constructor stub
 	}
 	
 	public void setStarttime(int hour, int minute){
@@ -41,5 +40,36 @@ public class SCHInterval {
 				return false;
 			}
 		}
+	}
+	
+	public int getStart_hour() {
+		return start_hour;
+	}
+
+	public int getStart_minute() {
+		return start_minute;
+	}
+
+	public int getStop_hour() {
+		return stop_hour;
+	}
+
+	public int getStop_minute() {
+		return stop_minute;
+	}
+
+	@Override
+	public int compareTo(SCHInterval o) {
+		int start_val1 = (this.start_hour*60)+this.start_minute;
+		int start_val2 = (o.start_hour*60)+o.start_minute;
+		
+		return start_val1-start_val2;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		// TODO Auto-generated method stub
+		
+		return super.equals(obj);
 	}
 }
