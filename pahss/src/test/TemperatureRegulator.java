@@ -4,23 +4,66 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-
-public class TemperatureRegulator{
+class TankID{
+	public int speciesID;
+	public int tankID;
+	public int amount;
+	public TankID(int s, int t, int a){
+		speciesID = s; tankID = t; amount = a;
+	}
+};
+public class TemperatureRegulator extends Thread{
 	
 	static String url = "jdbc:mysql://173.247.244.100:3306/asauce5_aquarium";
 	static String username = "asauce5_cs437";
 	static String password = "cs437pahss";
-	private ArrayList<Fish> tankStock;
+	private static int MODULE = 4;
+	private ArrayList<Fish> speciesData;
+	private ArrayList<TankID> tankIDS;
 	private Heater heater = new Heater();
 	private Chiller chiller = new Chiller();
-	private float opTemp = 50;
+	private boolean isRunning = true;
+	private int fps = 20;
+	long lastLoopTime = 0;
+	long refreshTime = 0;
+	private float opTemp = 0;
 	private float curTemp = 55;
 	
 	public TemperatureRegulator()
 	{
 		
 	}
-	
+
+	@Override
+	public void run() {
+		initialize();
+		while (isRunning){
+			long time = System.currentTimeMillis(); 
+	        long delta = time - lastLoopTime;
+	        lastLoopTime = System.currentTimeMillis();
+	        
+	        update(delta);
+	        
+	        //  delay for each frame  -   time it took for one frame 
+	        time = (1000 / fps) - (System.currentTimeMillis() - time); 
+	        if (time > 0) 
+            { 
+                try 
+                { 
+                        Thread.sleep(time); 
+                } 
+                catch(Exception e){} 
+            } 
+		}
+	}
+	void initialize()
+	{
+		System.out.println("Initializing Temperature Regulator");
+		tankIDS = getTankStock();
+		speciesData = getSpeciesData();
+		opTemp = calculateOptimalTemperature();
+		System.out.println("Temperature Regulator initialized");
+	}
 	public ArrayList<Fish> getSpeciesData()
 	{
 		ArrayList<Fish> tStock = new ArrayList<Fish>();
@@ -29,21 +72,25 @@ public class TemperatureRegulator{
 		{
 			Fish fish;
 			Connection connection = null;
-			System.out.println("Connecting to Species_Database...");
+			System.out.println("Connecting to species_database...");
 			connection = DriverManager.getConnection(url, username, password);
 			Statement stmt = connection.createStatement();
-			String query = "select * from Species_Database";
-			ResultSet rs = stmt.executeQuery(query);
-			
-			while(rs.next())
+			for(int i = 0; i < tankIDS.size(); i++)
 			{
-				fish = new Fish(rs.getInt("id"), rs.getString("name"), rs.getDouble("ammonia"),
-						rs.getDouble("nitrate"),rs.getDouble("nitrite"),
-						rs.getDouble("oxygen"), rs.getDouble("pH"),
-						rs.getDouble("salinity"), rs.getDouble("temperature"),
-						rs.getDouble("water_hardness")); 
+				String query = "select * from species_database where id=" + tankIDS.get(i).speciesID;
+				ResultSet rs = stmt.executeQuery(query);
 				
-				tStock.add(fish);
+				while(rs.next())
+				{
+	
+					fish = new Fish(rs.getInt("id"), rs.getString("name"), rs.getDouble("ammonia"),
+							rs.getDouble("nitrate"),rs.getDouble("nitrite"),
+							rs.getDouble("oxygen"), rs.getDouble("pH"),
+							rs.getDouble("salinity"), rs.getDouble("temperature"),
+							rs.getDouble("water_hardness")); 
+					
+					tStock.add(fish);
+				}
 			}
 			connection.close();
 			System.out.println("Species Information Acquired");
@@ -57,13 +104,13 @@ public class TemperatureRegulator{
 		
 		return tStock;
 	}
-	public ArrayList<Fish> getTankStock()
+	public ArrayList<TankID> getTankStock()
 	{
-		ArrayList<Fish> tStock = new ArrayList<Fish>();
+		ArrayList<TankID> tStock = new ArrayList<TankID>();
 		
 		try
 		{
-			Fish fish;
+			TankID id;
 			Connection connection = null;
 			System.out.println("Connecting to tank_stock...");
 			connection = DriverManager.getConnection(url, username, password);
@@ -73,13 +120,10 @@ public class TemperatureRegulator{
 			
 			while(rs.next())
 			{
-				fish = new Fish(rs.getInt("id"), rs.getString("name"), rs.getDouble("ammonia"),
-						rs.getDouble("nitrate"),rs.getDouble("nitrite"),
-						rs.getDouble("oxygen"), rs.getDouble("pH"),
-						rs.getDouble("salinity"), rs.getDouble("temperature"),
-						rs.getDouble("water_hardness")); 
+				id = new TankID(rs.getInt("species_id"), rs.getInt("tank_id"),
+						rs.getInt("amount"));
 				
-				tStock.add(fish);
+				tStock.add(id);
 			}
 			connection.close();
 			System.out.println("Tank Stock Acquired");
@@ -93,32 +137,37 @@ public class TemperatureRegulator{
 		
 		return tStock;
 	}
-	public void update()
+	public void update(long dt)
 	{
-		if((int)curTemp != (int)opTemp)
+		refreshTime += dt;
+		if(refreshTime > 1000)
 		{
-			if ((int)curTemp < (int)opTemp){
-				if(!heater.isOn()){
-					setHeater(true);
-					setChiller(false);
+			if((int)curTemp != (int)opTemp)
+			{
+				if ((int)curTemp < (int)opTemp){
+					if(!heater.isOn()){
+						setHeater(true);
+						setChiller(false);
+					}
+				}
+				else{
+					if(!chiller.isOn()){
+						setChiller(true);
+						setHeater(false);
+					}
+				}
+				if(chiller.isOn() || heater.isOn()){
+					adjustTemperature();
 				}
 			}
-			else{
-				if(!chiller.isOn()){
-					setChiller(true);
-					setHeater(false);
-				}
+			else
+			{
+				if(heater.isOn())
+					heater.setOn(false);
+				if(chiller.isOn())
+					chiller.setOn(false);
 			}
-			if(chiller.isOn() || heater.isOn()){
-				adjustTemperature();
-			}
-		}
-		else
-		{
-			if(heater.isOn())
-				heater.setOn(false);
-			if(chiller.isOn())
-				chiller.setOn(false);
+			refreshTime = 0;
 		}
 		
 	}
@@ -135,11 +184,11 @@ public class TemperatureRegulator{
 		try
 		{
 			Connection connection = null;
-			System.out.println("Connecting to tank_stock...");
+			System.out.println("Connecting to action_log...");
 			connection = DriverManager.getConnection(url, username, password);
 			Statement stmt = connection.createStatement();
 			String insert = "insert into action_log (module_id, time_stamp, action_taken) values ("
-				+ 4 + "," +"'" + sqlDate
+				+ MODULE + "," +"'" + sqlDate
 				+ " " + c.get(Calendar.HOUR_OF_DAY) + ":" + c.get(Calendar.MINUTE) + ":" + c.get(Calendar.SECOND) 
 				+ "'" + "," + "'" + action + "'"  +")";
 			stmt.executeUpdate(insert);
@@ -154,9 +203,26 @@ public class TemperatureRegulator{
 			System.out.println(s);
 		}
 	}
-	public void calculateOptimalTemperature()
+	public int calculateOptimalTemperature()
 	{
-		//calculate op temp and save it to database
+		System.out.println("Calculating Optimal Temperature...");
+		int size = speciesData.size();
+		if(size != 0)
+		{
+			int temp = 0;
+			for(int i = 0; i < size; i++)
+			{
+				temp += speciesData.get(i).getTemperature();
+			}
+			System.out.println("Optimal Temperature acquired: " + temp / size);
+			return temp / size; // average temperature
+		}
+		else
+		{
+			System.out.println("NO SPECIES DATA AVAILABLE FOR TEMPERATURE CALCULATION!");
+			return 100;
+		}
+		
 	}
 	public void adjustTemperature()
 	{
@@ -200,16 +266,16 @@ public class TemperatureRegulator{
 	{
 		
 	}
-	public void testPrintCurrentStock()
+	/*public void testPrintCurrentStock()
 	{
-		tankStock = getSpeciesData();
+		speciesData = getSpeciesData();
 		
 		System.out.println("\nPrinting Current Tank Stock: ");
-		for(int i = 0; i < tankStock.size(); i++)
+		for(int i = 0; i < speciesData.size(); i++)
 		{
-			System.out.println(tankStock.get(i).toString());
+			System.out.println(speciesData.get(i).toString());
 		}
 		
-	}
+	}*/
 
 }

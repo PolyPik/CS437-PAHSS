@@ -55,16 +55,16 @@ public class ProtoSimulator extends JFrame{
         setResizable(false); 
         setDefaultCloseOperation(EXIT_ON_CLOSE); 
         setVisible(true); 
-        
+        tr.start();
 	}
 	void update(long dt)
 	{
-		refreshTime += dt;
+		/*refreshTime += dt;
 		if (refreshTime > 1000) // update TR once a second only
 		{
 			tr.update();
 			refreshTime = 0;
-		}
+		}*/
 	}
 	void draw()
 	{

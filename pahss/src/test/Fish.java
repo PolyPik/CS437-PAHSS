@@ -6,8 +6,8 @@ public class Fish {
 	private double waterHardness; private double temperature; private String name; private int id;
 	private boolean isAlive;
 
-	public Fish(int id, String n, double o2, double niLevel, double naLevel, double sal, double ph, double ammonia,
-			double water, double temp)
+	public Fish(int id, String n, double ammonia, double naLevel, double niLevel, double o2, double ph, double sal,
+			double temp, double water)
 	{
 		isAlive = true;
 		this.id = id; name = n; o2Level = o2; nitriteLevel = niLevel; nitrateLevel = naLevel; 
