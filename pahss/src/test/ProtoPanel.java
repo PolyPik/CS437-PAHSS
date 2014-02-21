@@ -1,7 +1,5 @@
 package test;
 
-import java.awt.EventQueue;
-
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
@@ -21,33 +19,56 @@ import javax.swing.JMenuItem;
 import javax.swing.JTextArea;
 import javax.swing.ListSelectionModel;
 
-public class ProtoPanel {
+public class ProtoPanel extends Thread{
 
 	private JFrame frmPahss;
-
-	/**
-	 * Launch the application.
-	 */
+	private boolean isRunning = true;
+	private int fps = 20;
+	TemperatureRegulator tr = new TemperatureRegulator();
+	long lastLoopTime = 0;
+	long refreshTime = 0;
+	
 	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					ProtoPanel window = new ProtoPanel();
-					window.frmPahss.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
+		ProtoPanel window = new ProtoPanel();
+		window.frmPahss.setVisible(true);
+		window.run();
+		System.exit(0);
 	}
 
+	public void run() {
+		try {
+			while (isRunning){
+				long time = System.currentTimeMillis(); 
+		        long delta = time - lastLoopTime;
+		        lastLoopTime = System.currentTimeMillis();
+		        
+		        update(delta);
+		        
+		        //  delay for each frame  -   time it took for one frame 
+		        time = (1000 / fps) - (System.currentTimeMillis() - time); 
+		        if (time > 0) 
+	            { 
+	                try 
+	                { 
+	                        Thread.sleep(time); 
+	                } 
+	                catch(Exception e){} 
+	            } 
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 	/**
 	 * Create the application.
 	 */
 	public ProtoPanel() {
 		initialize();
 	}
-
+	public void update(long dt)
+	{
+		
+	}
 	/**
 	 * Initialize the contents of the frame.
 	 */
@@ -57,6 +78,7 @@ public class ProtoPanel {
 		frmPahss.setBounds(100, 100, 720, 480);
 		frmPahss.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmPahss.setResizable(false);
+		tr.start();
 		
 		JList<String> TankList = new JList<String>();
 		TankList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);

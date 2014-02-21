@@ -23,11 +23,14 @@ public class TemperatureRegulator extends Thread{
 	private Heater heater = new Heater();
 	private Chiller chiller = new Chiller();
 	private boolean isRunning = true;
+	private boolean isAutomated = true;
 	private int fps = 20;
 	long lastLoopTime = 0;
 	long refreshTime = 0;
-	private float opTemp = 0;
-	private float curTemp = 55;
+	private double minTemp = 1000; 
+	private double maxTemp = 0;
+	private double opTemp = 0;
+	private double curTemp = 76;
 	
 	public TemperatureRegulator()
 	{
@@ -112,7 +115,7 @@ public class TemperatureRegulator extends Thread{
 		{
 			TankID id;
 			Connection connection = null;
-			System.out.println("Connecting to tank_stock...");
+			System.out.println("Connecting to tank_stock database...");
 			connection = DriverManager.getConnection(url, username, password);
 			Statement stmt = connection.createStatement();
 			String query = "select * from tank_stock";
@@ -142,7 +145,7 @@ public class TemperatureRegulator extends Thread{
 		refreshTime += dt;
 		if(refreshTime > 1000)
 		{
-			if((int)curTemp != (int)opTemp)
+			if(((int)curTemp != (int)opTemp) && isAutomated)
 			{
 				if ((int)curTemp < (int)opTemp){
 					if(!heater.isOn()){
@@ -163,10 +166,13 @@ public class TemperatureRegulator extends Thread{
 			else
 			{
 				if(heater.isOn())
-					heater.setOn(false);
+					setHeater(false);
 				if(chiller.isOn())
-					chiller.setOn(false);
+					setChiller(false);
 			}
+			if(!isAutomated && (heater.isOn() || chiller.isOn()))
+				adjustTemperature();
+			
 			refreshTime = 0;
 		}
 		
@@ -184,7 +190,7 @@ public class TemperatureRegulator extends Thread{
 		try
 		{
 			Connection connection = null;
-			System.out.println("Connecting to action_log...");
+			System.out.println("Connecting to action_log database...");
 			connection = DriverManager.getConnection(url, username, password);
 			Statement stmt = connection.createStatement();
 			String insert = "insert into action_log (module_id, time_stamp, action_taken) values ("
@@ -210,11 +216,20 @@ public class TemperatureRegulator extends Thread{
 		if(size != 0)
 		{
 			int temp = 0;
+			double curTemp = 0;
 			for(int i = 0; i < size; i++)
 			{
-				temp += speciesData.get(i).getTemperature();
+				curTemp = speciesData.get(i).getTemperature();
+				temp += curTemp;
+				
+				if (minTemp > curTemp)
+					minTemp = curTemp;
+				if (maxTemp < curTemp)
+					maxTemp = curTemp;
 			}
 			System.out.println("Optimal Temperature acquired: " + temp / size);
+			System.out.println("Min temp: " + minTemp);
+			System.out.println("Max temp: " + maxTemp);
 			return temp / size; // average temperature
 		}
 		else
@@ -226,32 +241,30 @@ public class TemperatureRegulator extends Thread{
 	}
 	public void adjustTemperature()
 	{
-		if (curTemp < opTemp){
+		//Need to find a way to override simulated controls so that user can switch chiller on and off
+		//and it won't case an issue with overrides
+		//if (curTemp < opTemp)
+		//{
 			if (heater.isOn())
 				curTemp+= .1;
-		}
-		else if (curTemp > opTemp){
+		//}
+		//else if (curTemp > opTemp)
+		//{
 			if (chiller.isOn())
 				curTemp -= .1;
-		}
-		System.out.printf("Adjusting Temp: %.1f%n", curTemp);
-	}
-	public Chiller getChiller()
-	{
-		return chiller;
+		//}
+		System.out.printf("Adjusting Temp: %.1f%n", curTemp);	
 	}
 	public void setChiller(boolean onOrOff)
 	{
 		chiller.setOn(onOrOff);
+		System.out.println("Chiller is switching " + ( onOrOff == true ? "on" : "off"));
 		sendActions("Chiller turned " + (onOrOff ? "on" : "off"));
-	}
-	public Heater getHeater()
-	{
-		return heater;
 	}
 	public void setHeater(boolean onOrOff)
 	{
 		heater.setOn(onOrOff);
+		System.out.println("Heater is switching " + ( onOrOff == true ? "on" : "off"));
 		sendActions("Heater turned " + (onOrOff ? "on" : "off"));
 	}
 	public void sendDataToMI()
@@ -266,16 +279,4 @@ public class TemperatureRegulator extends Thread{
 	{
 		
 	}
-	/*public void testPrintCurrentStock()
-	{
-		speciesData = getSpeciesData();
-		
-		System.out.println("\nPrinting Current Tank Stock: ");
-		for(int i = 0; i < speciesData.size(); i++)
-		{
-			System.out.println(speciesData.get(i).toString());
-		}
-		
-	}*/
-
 }

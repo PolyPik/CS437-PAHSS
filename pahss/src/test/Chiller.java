@@ -14,7 +14,6 @@ public class Chiller {
 
 	public void setOn(boolean isOn) {
 		this.isOn = isOn;
-		System.out.println("Chiller is switching " + ( isOn == true ? "on" : "off"));
 	}
 
 }

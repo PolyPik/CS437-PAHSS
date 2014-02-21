@@ -1,7 +1,9 @@
-package test;
+ package test;
 
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
@@ -36,6 +38,15 @@ public class TempPanel extends JPanel{
 		setPreferredSize(new Dimension(100, 100));
 		setFocusable(true);
 		
+		OptionListener ol = new OptionListener();
+		tempUpButton.addActionListener(ol);
+		tempDownButton.addActionListener(ol);
+		heaterOn.addActionListener(ol);
+		heaterOff.addActionListener(ol);
+		chillerOn.addActionListener(ol);
+		chillerOff.addActionListener(ol);
+		
+		
 		heaterOff.setSelected(true);
 		chillerOff.setSelected(true);
 		heaterGroup.add(heaterOn);
@@ -60,4 +71,34 @@ public class TempPanel extends JPanel{
 		add(tempPanel);
 		add(controlPanel);
 	}
+	 private class OptionListener implements ActionListener
+	    {
+	        public void actionPerformed(ActionEvent event)
+	        {
+	            Object source = event.getSource();
+	            if (source.equals(tempUpButton))
+	            {
+	            }
+	            if(source.equals(tempDownButton))
+	            {
+	            	
+	            }
+	            if(source.equals(heaterOn))
+	            {
+	            	
+	            }
+	            if(source.equals(heaterOff))
+	            {
+	            	
+	            }
+	            if(source.equals(chillerOn))
+	            {
+	            	
+	            }
+	            if(source.equals(chillerOff))
+	            {
+	            	
+	            }
+	        }
+	    }
 }
