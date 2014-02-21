@@ -19,6 +19,7 @@ public abstract class SCHEntry {
 	
 	public SCHEntry(String name){
 		interval_list = new ArrayList<SCHInterval>();
+		this.name = name;
 		//starter = new Scheduler();
 		//stopper = new Scheduler();
 		//start_calendar = new StringBuilder();
@@ -44,7 +45,7 @@ public abstract class SCHEntry {
 		interv.setStoptime(hour2, minute2);
 		Collections.sort(interval_list);
 	}
-	
+
 //	public void applyCalendar(){
 //		if(start_calendar.length()>0){
 //			start_calendar.delete(0, start_calendar.length());
@@ -80,5 +81,9 @@ public abstract class SCHEntry {
 	
 	public List<SCHInterval> getIntervalList(){
 		return interval_list;
+	}
+	
+	public String getName(){
+		return name;
 	}
 }

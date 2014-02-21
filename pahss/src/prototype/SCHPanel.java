@@ -1,5 +1,6 @@
 package prototype;
 
+import java.awt.Component;
 import java.util.HashMap;
 import java.util.List;
 
@@ -7,9 +8,11 @@ import javax.swing.AbstractListModel;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -60,6 +63,9 @@ public class SCHPanel extends JPanel{
 		
 		this.add(SCHButtonPanel);
 		
+		EntryList.setCellRenderer(new EntryRenderer());
+		IntervalList.setCellRenderer(new IntervalRenderer());
+		
 		EntryList.addListSelectionListener(new ListSelectionListener() {
 			
 			@Override
@@ -76,7 +82,6 @@ public class SCHPanel extends JPanel{
 		fillListModels();
 		EntryList.setSelectedIndex(0);
 		IntervalList.setModel(EntryIntervalMap.get(EntryList.getSelectedValue()));
-		
 	}
 	
 	private void fillListModels(){
