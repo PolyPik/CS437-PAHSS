@@ -4,8 +4,8 @@ import java.util.HashMap;
 
 public class LightEntry extends SCHEntry {
 	HashMap<SCHInterval,Double> intensity_table;
-	public LightEntry() {
-		super();
+	public LightEntry(String name) {
+		super(name);
 		// TODO Auto-generated constructor stub
 	}
 	
