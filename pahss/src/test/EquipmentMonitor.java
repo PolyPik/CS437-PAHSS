@@ -10,22 +10,67 @@ public class EquipmentMonitor {
 		return equipmentCheckList;
 	}
 
+	// replaces monitor.getCheckList.get(i);
+	public EquipmentCheck getCheckListValue(int i) {
+		return equipmentCheckList.get(i);
+	}
+
+	// replaces monitor.getCheckList.add(i);
 	public void addToCheckList(EquipmentCheck e) {
 		equipmentCheckList.add(e);
 	}
 }
 
 class EquipmentCheck extends Thread {
-	String equipmentName;
-	String errorNotice;
+	String equipmentName = "Unknown Equipment";//perhaps to store name of equipment from database later?
+	String errorNotice = "Equipment is broken! Fix immediately!";//perhaps to store error notice from database later
 	int tank_id;
 	int equipment_id;
 	boolean isOperational = true;
 	boolean isChecked = false;
 
-	EquipmentCheck(String equipmentName, String errorNotice) {
-		this.equipmentName = equipmentName;
-		this.errorNotice = errorNotice;
+	EquipmentCheck(int tank_id, int equipment_id) {
+		this.tank_id = tank_id;
+		this.equipment_id = equipment_id;
+		if (equipment_id == 1)
+			equipmentName = "Heater";
+		else if (equipment_id == 2)
+			equipmentName = "Chiller";
+		else if (equipment_id == 3)
+			equipmentName = "Chemical dispenser";
+		else if (equipment_id == 4)
+			equipmentName = "Feeder";
+		else if (equipment_id == 5)
+			equipmentName = "Lighting";
+		else if (equipment_id == 6)
+			equipmentName = "Air pump";
+		else if (equipment_id == 7)
+			equipmentName = "Filtration";
+		else if (equipment_id == 8)
+			equipmentName = "Water pump";
+		else if (equipment_id == 9)
+			equipmentName = "Temperature sensor";
+		else if (equipment_id == 10)
+			equipmentName = "Salinity sensor";
+		else if (equipment_id == 11)
+			equipmentName = "ph sensor";
+		else if (equipment_id == 12)
+			equipmentName = "Ammonia sensor";
+		else if (equipment_id == 13)
+			equipmentName = "Nitrite sensor";
+		else if (equipment_id == 14)
+			equipmentName = "Nitrate sensor";
+		else if (equipment_id == 15)
+			equipmentName = "Oxygen sensor";
+		else if (equipment_id == 16)
+			equipmentName = "Water hardness sensor";
+		else if (equipment_id == 17)
+			equipmentName = "Reservoir water level sensor";
+		else if (equipment_id == 18)
+			equipmentName = "Feeder food supply";
+		else if (equipment_id == 19)
+			equipmentName = "Chemical supply dispenser";
+		errorNotice = equipmentName + " is broken! Please fix immediately!";
 	}
 
 	public void setOperational(boolean operational) {
@@ -55,24 +100,32 @@ class EquipmentCheck extends Thread {
 			 * tank_id and equipment_id. Then, this method will use those ID's
 			 * to figure out which boolean value in the database to constantly
 			 * read. Whenever that value is set to false, an error message will
-			 * be sent to MI. Otherwise, print out that everything is fine. More
-			 * work on this is needed.
+			 * be sent to MI. Otherwise, print out that everything is fine. In
+			 * order to keep the internal value of the boolean update, we might
+			 * have to continuously keep reading from the database. That means
+			 * we'll either have to create a variable right before the checks
+			 * below that will keep reading based on id's, or just use the code
+			 * that would access the database inside the booleans of the checks
+			 * below. More work on this is needed.
 			 */
 
 			if (!getOperational() && !isChecked) {
-				System.out.println("ERROR: " + equipmentName + " malfunction: "
+				System.out.println("ERROR: Tank " + tank_id + "'s " + equipmentName + " MALFUNCTION: "
 						+ errorNotice);
 				setChecked(true);
 			}
 			if (getOperational() && isChecked) {
 				setChecked(false);
-				System.out.println("Error has been fixed on " + equipmentName);
+				System.out.println("Error has been fixed on Tank " + tank_id + "'s " + equipmentName);
 			}
 
-			/*
-			 * try { sleep(5000); } catch (InterruptedException e) {
-			 * System.out.println("sleep(5000) did not work"); }
-			 */
+			// *
+			try {
+				sleep(2000);
+			} catch (InterruptedException e) {
+				System.out.println("sleep did not work");
+			}
+			// */
 		}
 	}
 
@@ -100,14 +153,11 @@ class EquipmentCheck extends Thread {
 
 		for (int t = 1; t <= numberOfTanks; t++) {
 			for (int e = 1; e <= 19; e++)
-				monitor.getCheckList().add(
-						new EquipmentCheck("Equipment of Tank " + t
-								+ " Equipment ID " + e,
-								"Equipment is broken! Fix immediately"));
+				monitor.addToCheckList(new EquipmentCheck(t, e));
 		}
 
 		for (int i = 0; i < monitor.getCheckList().size(); i++)
-			monitor.getCheckList().get(i).start();
+			monitor.getCheckListValue(i).start();
 
 		/*
 		 * This is a way to test the true/false case. Need to be able to
@@ -119,14 +169,15 @@ class EquipmentCheck extends Thread {
 		 */
 
 		System.out.println("All equipment currently working.");
-		System.out.println("Input numbers 0 through " + (numberOfTanks * 19 - 1) + " to break/fix equipment and display error/fix message:");
+		System.out.println("Input numbers 0 through "
+				+ (numberOfTanks * 19 - 1)
+				+ " to break/fix equipment and display error/fix message:");
 		while (true) {
 			int boolSwitch = input.nextInt();
 			if (boolSwitch >= 0 && boolSwitch < monitor.getCheckList().size())
-				monitor.getCheckList()
-						.get(boolSwitch)
+				monitor.getCheckListValue(boolSwitch)
 						.setOperational(
-								!monitor.getCheckList().get(boolSwitch)
+								!monitor.getCheckListValue(boolSwitch)
 										.getOperational());
 		}
 
