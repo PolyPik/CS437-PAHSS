@@ -63,15 +63,14 @@ public class SCHFrame {
 		frmPahss.setBounds(100, 100, 720, 480);
 		frmPahss.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmPahss.setResizable(false);
-		SCHPanel schpanel = new SCHPanel();
+		SCHPanel schpanel = new SCHPanel(frmPahss);
 		frmPahss.add(schpanel);
-		SCHEntry entry1 = new FeederEntry("Entry 1");
-		SCHEntry entry2 = new FeederEntry("Entry 2");
+		LightEntry entry1 = new LightEntry("Entry 1");
+		//SCHEntry entry2 = new FeederEntry("Entry 2");
 		entry1.addInterval(3, 0, 3, 30);
-		entry2.addInterval(3, 0, 4, 30);
-		entry2.addInterval(5, 0, 6, 30);
+		entry1.setIntervalLumen(0, 10.5);
 		currentSCHModel.addEntry(entry1);
-		currentSCHModel.addEntry(entry2);
+		//currentSCHModel.addEntry(entry2);
 		schpanel.setSCHModel(currentSCHModel);
 	}
 

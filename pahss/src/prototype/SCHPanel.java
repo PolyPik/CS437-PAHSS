@@ -1,6 +1,8 @@
 package prototype;
 
 import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.List;
 
@@ -8,35 +10,47 @@ import javax.swing.AbstractListModel;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 
 import sch.*;
 
 public class SCHPanel extends JPanel{
+	private JFrame frame;
+	private LightDialog testdialog1;
 	private SCHModel currentSCHModel;
 	JList<SCHEntry> EntryList;
-	JList<SCHInterval> IntervalList;
+	JTable IntervalTable;
+	JTable IntervalTable2;
 	DefaultListModel<SCHEntry> EntryLM;
-	HashMap<SCHEntry,DefaultListModel<SCHInterval>> EntryIntervalMap; 
+	HashMap<SCHEntry,DefaultListModel<SCHInterval>> EntryIntervalMap;
+	HashMap<LightEntry,LightTM> LightIntervalMap;
+	HashMap<FeederEntry,DefaultTableModel> FeederIntervalMap;
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 629536423038624531L;
 	
-	public SCHPanel() {
+	public SCHPanel(JFrame frame) {
 		// TODO Auto-generated constructor stub
-		
+		this.frame = frame;
 		this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+		IntervalTable2 = new JTable();
 		
 		EntryLM = new DefaultListModel<SCHEntry>();
 		EntryIntervalMap = new HashMap<SCHEntry,DefaultListModel<SCHInterval>>();
+		LightIntervalMap = new HashMap<LightEntry,LightTM>();
 		
 		EntryList = new JList<SCHEntry>(EntryLM);
 		EntryList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -44,9 +58,9 @@ public class SCHPanel extends JPanel{
 		
 		this.add(entryScrollPane);
 		
-		IntervalList = new JList<SCHInterval>();
-		IntervalList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		JScrollPane intervalScrollPane = new JScrollPane(IntervalList);
+		IntervalTable = new JTable();
+		IntervalTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		JScrollPane intervalScrollPane = new JScrollPane(IntervalTable);
 		
 		this.add(intervalScrollPane);
 		
@@ -64,7 +78,7 @@ public class SCHPanel extends JPanel{
 		this.add(SCHButtonPanel);
 		
 		EntryList.setCellRenderer(new EntryRenderer());
-		IntervalList.setCellRenderer(new IntervalRenderer());
+		//IntervalTable.setCellRenderer(new IntervalRenderer());
 		
 		EntryList.addListSelectionListener(new ListSelectionListener() {
 			
@@ -72,7 +86,18 @@ public class SCHPanel extends JPanel{
 			public void valueChanged(ListSelectionEvent e) {
 				// TODO Auto-generated method stub
 				//int index = e.getFirstIndex();
-				IntervalList.setModel(EntryIntervalMap.get(EntryList.getSelectedValue()));
+				//IntervalTable.setModel(EntryIntervalMap.get(EntryList.getSelectedValue()));
+			}
+		});
+		
+		
+		testdialog1 = new LightDialog(frame);
+		editScheduleButton.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// TODO Auto-generated method stub
+				testdialog1.setVisible(true);
 			}
 		});
 	}
@@ -81,20 +106,21 @@ public class SCHPanel extends JPanel{
 		currentSCHModel = o;
 		fillListModels();
 		EntryList.setSelectedIndex(0);
-		IntervalList.setModel(EntryIntervalMap.get(EntryList.getSelectedValue()));
+		IntervalTable.setModel(LightIntervalMap.get((LightEntry)EntryList.getSelectedValue()));
+		//IntervalTable.setModel(EntryIntervalMap.get(EntryList.getSelectedValue()));
+		testdialog1.setTableModel(LightIntervalMap.get((LightEntry)EntryList.getSelectedValue()));
 	}
 	
 	private void fillListModels(){
 		EntryLM.clear();
-		List<SCHEntry> EntryList = currentSCHModel.getEntryList();
-		for(SCHEntry i: EntryList){
+		List<SCHEntry> el = currentSCHModel.getEntryList();
+		for(SCHEntry i: el){
 			EntryLM.addElement(i);
-			List<SCHInterval> IntervalList = i.getIntervalList();
-			DefaultListModel<SCHInterval> IntervalLM = new DefaultListModel<SCHInterval>();
-			for(SCHInterval j: IntervalList){
-				IntervalLM.addElement(j);
+			if(i instanceof LightEntry){
+				LightIntervalMap.put((LightEntry) i, new LightTM((LightEntry)i));
+			} else{
+				
 			}
-			EntryIntervalMap.put(i, IntervalLM);
 		}
 	}
 

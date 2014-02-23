@@ -6,6 +6,7 @@ public class LightEntry extends SCHEntry {
 	HashMap<SCHInterval,Double> intensity_table;
 	public LightEntry(String name) {
 		super(name);
+		intensity_table = new HashMap<SCHInterval,Double>();
 		// TODO Auto-generated constructor stub
 	}
 	
@@ -14,7 +15,7 @@ public class LightEntry extends SCHEntry {
 		intensity_table.put(interval, new Double(lum));
 	}
 	
-	public Double getIntervalLumen(int i,double lum){
+	public Double getIntervalLumen(int i){
 		SCHInterval interval = interval_list.get(i);
 		return intensity_table.get(interval);
 	}
