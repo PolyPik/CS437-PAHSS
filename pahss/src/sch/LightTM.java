@@ -6,6 +6,7 @@ import javax.swing.table.AbstractTableModel;
 
 public class LightTM extends AbstractTableModel {
 	LightEntry entry;
+	private static final String[] columnNames = {"Start Time", "Luminosity"};
 	
 	public LightTM() {
 		// TODO Auto-generated constructor stub
@@ -38,6 +39,12 @@ public class LightTM extends AbstractTableModel {
 		} else{
 			return entry.getIntervalLumen(arg0);
 		}
+	}
+	
+	@Override
+	public String getColumnName(int column) {
+		// TODO Auto-generated method stub
+		return columnNames[column];
 	}
 
 }
