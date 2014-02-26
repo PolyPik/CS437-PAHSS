@@ -9,6 +9,15 @@ public class SCHInterval implements Comparable<SCHInterval>{
 	public SCHInterval() {
 	}
 	
+	public SCHInterval(int start_hour, int start_minute, int stop_hour,
+			int stop_minute) {
+		super();
+		this.start_hour = start_hour;
+		this.start_minute = start_minute;
+		this.stop_hour = stop_hour;
+		this.stop_minute = stop_minute;
+	}
+
 	public void setStarttime(int hour, int minute){
 		start_hour = hour;
 		start_minute = minute;

@@ -1,114 +1,133 @@
 package prototype;
 
-import java.awt.Component;
-import java.awt.event.ActionEvent;
+import javax.swing.DefaultListModel;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JList;
+import javax.swing.JTable;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+
+import java.awt.GridLayout;
+
+import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
+import javax.swing.LayoutStyle.ComponentPlacement;
+import javax.swing.table.DefaultTableModel;
+
+import sch.FeederEntry;
+import sch.LightDialog;
+import sch.LightEntry;
+import sch.LightTM;
+import sch.SCHEntry;
+import sch.SCHInterval;
+import sch.SCHModel;
+
 import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 import java.util.HashMap;
 import java.util.List;
 
 import javax.swing.AbstractListModel;
-import javax.swing.BoxLayout;
-import javax.swing.DefaultListModel;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.ListCellRenderer;
-import javax.swing.ListSelectionModel;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
 
-import sch.*;
 
-public class SCHPanel extends JPanel{
-	private JFrame frame;
+public class SCHPanel extends JPanel {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -9216093653080287746L;
+	private JTable intervalTable;
 	private LightDialog testdialog1;
 	private SCHModel currentSCHModel;
-	JList<SCHEntry> EntryList;
-	JTable IntervalTable;
+	JList<SCHEntry> entryList;
 	JTable IntervalTable2;
 	DefaultListModel<SCHEntry> EntryLM;
 	HashMap<SCHEntry,DefaultListModel<SCHInterval>> EntryIntervalMap;
 	HashMap<LightEntry,LightTM> LightIntervalMap;
 	HashMap<FeederEntry,DefaultTableModel> FeederIntervalMap;
+
 	/**
-	 * 
+	 * Create the panel.
 	 */
-	private static final long serialVersionUID = 629536423038624531L;
-	
-	public SCHPanel(JFrame frame) {
-		// TODO Auto-generated constructor stub
-		this.frame = frame;
-		this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
-		IntervalTable2 = new JTable();
+	public SCHPanel() {
+		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+		
+		JScrollPane EntryScrollPane = new JScrollPane();
+		add(EntryScrollPane);
 		
 		EntryLM = new DefaultListModel<SCHEntry>();
+		entryList = new JList<SCHEntry>(EntryLM);
 		EntryIntervalMap = new HashMap<SCHEntry,DefaultListModel<SCHInterval>>();
 		LightIntervalMap = new HashMap<LightEntry,LightTM>();
+		EntryScrollPane.setViewportView(entryList);
 		
-		EntryList = new JList<SCHEntry>(EntryLM);
-		EntryList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		JScrollPane entryScrollPane = new JScrollPane(EntryList);
+		JScrollPane TableScrollPane = new JScrollPane();
+		add(TableScrollPane);
 		
-		this.add(entryScrollPane);
+		intervalTable = new JTable();
+		TableScrollPane.setViewportView(intervalTable);
 		
-		IntervalTable = new JTable();
-		IntervalTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		JScrollPane intervalScrollPane = new JScrollPane(IntervalTable);
+		JPanel panel = new JPanel();
+		add(panel);
 		
-		this.add(intervalScrollPane);
+		JButton startButton = new JButton("Start Schedule");
 		
-		JPanel SCHButtonPanel = new JPanel();
-		SCHButtonPanel.setLayout(new BoxLayout(SCHButtonPanel, BoxLayout.Y_AXIS));
-		
-		JButton startScheduleButton = new JButton("Start Schedule");
-		JButton stopScheduleButton = new JButton("Stop Schedule");
-		JButton editScheduleButton = new JButton("Edit Schedule");
-		
-		SCHButtonPanel.add(startScheduleButton);
-		SCHButtonPanel.add(stopScheduleButton);
-		SCHButtonPanel.add(editScheduleButton);
-		
-		this.add(SCHButtonPanel);
-		
-		EntryList.setCellRenderer(new EntryRenderer());
-		//IntervalTable.setCellRenderer(new IntervalRenderer());
-		
-		EntryList.addListSelectionListener(new ListSelectionListener() {
-			
-			@Override
-			public void valueChanged(ListSelectionEvent e) {
-				// TODO Auto-generated method stub
-				//int index = e.getFirstIndex();
-				//IntervalTable.setModel(EntryIntervalMap.get(EntryList.getSelectedValue()));
+		JButton stopButton = new JButton("Stop Schedule");
+		stopButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
 			}
 		});
 		
-		
-		testdialog1 = new LightDialog(frame);
-		editScheduleButton.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				// TODO Auto-generated method stub
-				testdialog1.setVisible(true);
+		JButton addButton = new JButton("Add Interval");
+		addButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
 			}
 		});
+		
+		JButton removeButton = new JButton("Remove Interval");
+		
+		JButton editButton = new JButton("Edit Interval");
+		GroupLayout gl_panel = new GroupLayout(panel);
+		gl_panel.setHorizontalGroup(
+			gl_panel.createParallelGroup(Alignment.TRAILING)
+				.addGroup(gl_panel.createSequentialGroup()
+					.addContainerGap()
+					.addGroup(gl_panel.createParallelGroup(Alignment.LEADING)
+						.addComponent(startButton, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 138, Short.MAX_VALUE)
+						.addComponent(stopButton, GroupLayout.DEFAULT_SIZE, 138, Short.MAX_VALUE)
+						.addComponent(addButton, GroupLayout.PREFERRED_SIZE, 138, GroupLayout.PREFERRED_SIZE)
+						.addComponent(removeButton, GroupLayout.PREFERRED_SIZE, 138, GroupLayout.PREFERRED_SIZE)
+						.addComponent(editButton, GroupLayout.PREFERRED_SIZE, 138, GroupLayout.PREFERRED_SIZE))
+					.addContainerGap())
+		);
+		gl_panel.setVerticalGroup(
+			gl_panel.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_panel.createSequentialGroup()
+					.addContainerGap()
+					.addComponent(startButton, GroupLayout.PREFERRED_SIZE, 38, GroupLayout.PREFERRED_SIZE)
+					.addPreferredGap(ComponentPlacement.RELATED)
+					.addComponent(stopButton, GroupLayout.PREFERRED_SIZE, 38, GroupLayout.PREFERRED_SIZE)
+					.addGap(48)
+					.addComponent(addButton, GroupLayout.PREFERRED_SIZE, 38, GroupLayout.PREFERRED_SIZE)
+					.addPreferredGap(ComponentPlacement.RELATED)
+					.addComponent(removeButton, GroupLayout.PREFERRED_SIZE, 38, GroupLayout.PREFERRED_SIZE)
+					.addPreferredGap(ComponentPlacement.RELATED)
+					.addComponent(editButton, GroupLayout.PREFERRED_SIZE, 38, GroupLayout.PREFERRED_SIZE)
+					.addContainerGap(178, Short.MAX_VALUE))
+		);
+		panel.setLayout(gl_panel);
+
 	}
 	
 	public void setSCHModel(SCHModel o){
 		currentSCHModel = o;
 		fillListModels();
-		EntryList.setSelectedIndex(0);
-		IntervalTable.setModel(LightIntervalMap.get((LightEntry)EntryList.getSelectedValue()));
+		entryList.setSelectedIndex(0);
+		//System.out.println(LightIntervalMap.get((LightEntry)entryList.getSelectedValue()).toString());
+		intervalTable.setModel(LightIntervalMap.get((LightEntry)entryList.getSelectedValue()));
 		//IntervalTable.setModel(EntryIntervalMap.get(EntryList.getSelectedValue()));
-		testdialog1.setTableModel(LightIntervalMap.get((LightEntry)EntryList.getSelectedValue()));
+		//testdialog1.setTableModel(LightIntervalMap.get((LightEntry)EntryList.getSelectedValue()));
 	}
 	
 	private void fillListModels(){
@@ -123,6 +142,4 @@ public class SCHPanel extends JPanel{
 			}
 		}
 	}
-
 }
-

@@ -26,18 +26,7 @@ public abstract class SCHEntry {
 		//stop_calendar = new StringBuilder();
 	}
 	
-	public void addInterval(int hour1, int minute1, int hour2, int minute2){
-		SCHInterval o = new SCHInterval();
-		o.setStarttime(hour1, minute1);
-		o.setStoptime(hour2, minute2);
-		interval_list.add(o);
-		Collections.sort(interval_list);
-	}
-	
-	public void removeInterval(int i){
-		interval_list.remove(i);
-		Collections.sort(interval_list);
-	}
+	public abstract void removeInterval(int i);
 	
 	public void editInterval(int i, int hour1, int minute1, int hour2, int minute2){
 		SCHInterval interv = interval_list.get(i);
