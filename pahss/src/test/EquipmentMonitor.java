@@ -4,6 +4,9 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.text.DateFormat;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Scanner;
 import java.util.ArrayList;
 
@@ -67,7 +70,8 @@ class MonitorGUI {
 		c.insets = new Insets(0, 5, 0, 5);
 
 		for (int i = 1; i <= numTanks; i++) {
-			JTextArea textArea = new JTextArea("Tank " + i + " data\n", 10, 10);
+			JTextArea textArea = new JTextArea("Tank " + i
+					+ " data. All equipment working.\n", 10, 10);
 			JScrollPane scrollPane = new JScrollPane(textArea);
 			c.fill = GridBagConstraints.HORIZONTAL;
 			c.weightx = 0.5;
@@ -95,7 +99,7 @@ class MonitorGUI {
 		myFrame.setSize(800, 500);
 		myFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		myFrame.setLocationRelativeTo(null);
-		myFrame.pack();
+		// myFrame.pack();
 		myFrame.setVisible(true);
 	}
 }
@@ -107,6 +111,14 @@ class EquipmentCheck extends Thread {
 	int equipment_id;
 	boolean isOperational = true;
 	boolean isChecked = false;
+
+	DateFormat dateFormatter = DateFormat.getDateInstance(DateFormat.DEFAULT,
+			Locale.US);
+	Date today = new Date();
+	String dateOut = dateFormatter.format(today);
+	DateFormat timeFormater = DateFormat.getTimeInstance(DateFormat.DEFAULT,
+			Locale.US);
+	String timeOut = timeFormater.format(today);
 
 	EquipmentCheck(int tank_id, int equipment_id) {
 		this.tank_id = tank_id;
@@ -185,6 +197,14 @@ class EquipmentCheck extends Thread {
 
 	public void run() {
 		while (true) {
+			dateFormatter = DateFormat.getDateInstance(DateFormat.DEFAULT,
+					Locale.US);
+			timeFormater = DateFormat.getTimeInstance(DateFormat.DEFAULT,
+					Locale.US);
+			today = new Date();
+			dateOut = dateFormatter.format(today);
+			timeOut = timeFormater.format(today);
+
 			/*
 			 * The following code simulates how the Equipment Monitor would keep
 			 * track of the boolean value. If we had a table in the database
@@ -208,8 +228,11 @@ class EquipmentCheck extends Thread {
 			 * value in the operational_status column of the equipment_status
 			 * table in the database. Alternatively, while the program is
 			 * running, we could set getOperational = boolean found in
-			 * operational_status of the equipment_status table. This would be
-			 * the query used to retrieve the value:
+			 * operational_status of the equipment_status table. The
+			 * error/resolution messages also need to be sent to the MI, and
+			 * when the MI is done resolving the issue, they must change the
+			 * boolean value to true and let EM know that the value has been
+			 * changed. This would be the query used to retrieve the value:
 			 * 
 			 * select operational_status from equipment_status where tank_id = 1
 			 * and equipment_id = 1;
@@ -217,18 +240,22 @@ class EquipmentCheck extends Thread {
 
 			if (!getOperational() && !isChecked) {
 				MonitorGUI.textAreaList.get(tank_id - 1).append(
-						"ERROR: Tank " + tank_id + "'s " + equipmentName
-								+ " MALFUNCTION: " + errorNotice + "\n");
-				System.out.println("ERROR: Tank " + tank_id + "'s "
-						+ equipmentName + " MALFUNCTION: " + errorNotice);
+						dateOut + " " + timeOut + "\nERROR: Tank " + tank_id
+								+ "'s " + equipmentName + " MALFUNCTION: "
+								+ errorNotice + "\n\n");
+				System.out.println(dateOut + " " + timeOut + "\nERROR: Tank "
+						+ tank_id + "'s " + equipmentName + " MALFUNCTION: "
+						+ errorNotice);
 				setChecked(true);
 			}
 			if (getOperational() && isChecked) {
 				setChecked(false);
 				MonitorGUI.textAreaList.get(tank_id - 1).append(
-						"Error has been fixed on Tank " + tank_id + "'s "
-								+ equipmentName + "\n");
-				System.out.println("Error has been fixed on Tank " + tank_id
+						dateOut + " " + timeOut
+								+ "\nRESOLVED: Error has been fixed on Tank "
+								+ tank_id + "'s " + equipmentName + "\n\n");
+				System.out.println(dateOut + " " + timeOut
+						+ "\nRESOLVED: Error has been fixed on Tank " + tank_id
 						+ "'s " + equipmentName);
 			}
 
