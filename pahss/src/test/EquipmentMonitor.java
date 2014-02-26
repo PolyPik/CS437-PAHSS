@@ -35,7 +35,10 @@ class EquipmentCheck extends Thread {
 		/*
 		 * instead of all these if statements, equipmentName will take the
 		 * equipment id, look for it on the table equipment_checks in the
-		 * database, and assigns itself to whatever name it finds there
+		 * database, and assigns itself to whatever name it finds there. This is
+		 * an example of the query it will use:
+		 * 
+		 * select equipment_name from equipment_checks where equipment_id = 1;
 		 */
 		if (equipment_id == 1)
 			equipmentName = "Heater";
@@ -78,7 +81,9 @@ class EquipmentCheck extends Thread {
 		/*
 		 * The same process that equipmentName went through will also occur for
 		 * errorNotice, except it will use the value found in the error_message
-		 * field
+		 * field. This is an example of the query it will use:
+		 * 
+		 * select error_message from equipment_checks where equipment_id = 1;
 		 */
 		errorNotice = equipmentName + " is broken! Please fix immediately!";
 	}
@@ -124,7 +129,11 @@ class EquipmentCheck extends Thread {
 			 * value in the operational_status column of the equipment_status
 			 * table in the database. Alternatively, while the program is
 			 * running, we could set getOperational = boolean found in
-			 * operational_status of the equipment_status table.
+			 * operational_status of the equipment_status table. This would be
+			 * the query used to retrieve the value:
+			 * 
+			 * select operational_status from equipment_status where tank_id = 1
+			 * and equipment_id = 1;
 			 */
 
 			if (!getOperational() && !isChecked) {
@@ -165,6 +174,13 @@ class EquipmentCheck extends Thread {
 		 * MI.
 		 */
 
+		/*
+		 * Here, we are allowing the user to determine the number of tanks.
+		 * Instead, we can automatically detect how many tanks there are using
+		 * this query:
+		 * 
+		 * select count(id) from tank_database;
+		 */
 		EquipmentMonitor monitor = new EquipmentMonitor();
 		Scanner input = new Scanner(System.in);
 		System.out
@@ -185,7 +201,14 @@ class EquipmentCheck extends Thread {
 		 * modules in charge of the equipment can specify which tank is causing
 		 * the error when errors occur. They will then send the tank id and
 		 * equipment id, and based on those id's, the corresponding tank will
-		 * have its boolean set to false.
+		 * have its boolean set to false. Here are examples of queries that
+		 * would be used to modify the boolean values in the database:
+		 * 
+		 * update equipment_status set operational_status = 0 where tank_id = 1
+		 * and equipment_id = 1;
+		 * 
+		 * update equipment_status set operational_status = 1 where tank_id = 1
+		 * and equipment_id = 1;
 		 */
 
 		System.out.println("All equipment currently working.");
