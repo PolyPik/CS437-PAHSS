@@ -16,7 +16,7 @@ public class TankPanel extends JPanel{
 	private JPanel controlPanel = new JPanel();
 	private JPanel mainPanel = new JPanel();
 	private JTabbedPane jtp = new JTabbedPane();
-	private TempPanel tr = new TempPanel();
+	//private TempPanel tr = new TempPanel();
 	
 	public TankPanel()
 	{
@@ -31,7 +31,7 @@ public class TankPanel extends JPanel{
 		
 		jtp.addTab("Main", mainPanel);
 		jtp.addTab("Control", controlPanel);
-		jtp.addTab("Temperature Regulator", tr);
+		//jtp.addTab("Temperature Regulator", tr);
 	}
 	
 	public JTabbedPane getMainPanel()

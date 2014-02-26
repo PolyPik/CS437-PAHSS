@@ -1,8 +1,12 @@
 package test;
 
+//TODO: DOUBLE CHECK THAT NOTIFICATIONS WORK
+
 import java.sql.*;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.concurrent.Semaphore;
 
 class TankID{
 	public int speciesID;
@@ -20,6 +24,7 @@ public class TemperatureRegulator extends Thread{
 	private static int MODULE = 4;
 	private ArrayList<Fish> speciesData;
 	private ArrayList<TankID> tankIDS;
+	private ArrayList<String> notifications;
 	private Heater heater = new Heater();
 	private Chiller chiller = new Chiller();
 	private boolean isRunning = true;
@@ -30,11 +35,13 @@ public class TemperatureRegulator extends Thread{
 	private double minTemp = 1000; 
 	private double maxTemp = 0;
 	private double opTemp = 0;
-	private double curTemp = 76;
+	private double curTemp = 76; // get curTemp from one of the databases
+	DecimalFormat df = new DecimalFormat("#.##");
+	Semaphore s;
 	
-	public TemperatureRegulator()
+	public TemperatureRegulator(Semaphore s)
 	{
-		
+		this.s = s;
 	}
 
 	@Override
@@ -61,11 +68,13 @@ public class TemperatureRegulator extends Thread{
 	}
 	void initialize()
 	{
-		System.out.println("Initializing Temperature Regulator");
+		notifications.add("Initializing Temperature Regulator");
 		tankIDS = getTankStock();
 		speciesData = getSpeciesData();
 		opTemp = calculateOptimalTemperature();
-		System.out.println("Temperature Regulator initialized");
+		notifications.add("Temperature Regulator initialized");
+		//curTemp = some value from a database
+		s.release();
 	}
 	public ArrayList<Fish> getSpeciesData()
 	{
@@ -143,7 +152,7 @@ public class TemperatureRegulator extends Thread{
 	public void update(long dt)
 	{
 		refreshTime += dt;
-		if(refreshTime > 1000)
+		if(refreshTime > 1000) // update once a second only, not every frame
 		{
 			if(((int)curTemp != (int)opTemp) && isAutomated)
 			{
@@ -163,12 +172,15 @@ public class TemperatureRegulator extends Thread{
 					adjustTemperature();
 				}
 			}
-			else
+			else 
 			{
-				if(heater.isOn())
-					setHeater(false);
-				if(chiller.isOn())
-					setChiller(false);
+				if(isAutomated)
+				{
+					if(heater.isOn())
+						setHeater(false);
+					if(chiller.isOn())
+						setChiller(false);
+				}
 			}
 			if(!isAutomated && (heater.isOn() || chiller.isOn()))
 				adjustTemperature();
@@ -190,28 +202,27 @@ public class TemperatureRegulator extends Thread{
 		try
 		{
 			Connection connection = null;
-			System.out.println("Connecting to action_log database...");
+			notifications.add("Connecting to action_log database...");
 			connection = DriverManager.getConnection(url, username, password);
 			Statement stmt = connection.createStatement();
 			String insert = "insert into action_log (module_id, time_stamp, action_taken) values ("
 				+ MODULE + "," +"'" + sqlDate
-				+ " " + c.get(Calendar.HOUR_OF_DAY) + ":" + c.get(Calendar.MINUTE) + ":" + c.get(Calendar.SECOND) 
-				+ "'" + "," + "'" + action + "'"  +")";
+				+ " " + c.get(Calendar.HOUR_OF_DAY) + ":" + c.get(Calendar.MINUTE) + ":" 
+				+ c.get(Calendar.SECOND) + "'" + "," + "'" + action + "'"  +")";
 			stmt.executeUpdate(insert);
 			
 			connection.close();
-			System.out.println("Action logged.");
-			System.out.println("Connection closed.");
+			notifications.add("Action logged. Connection closed.");
 		}
 		catch(SQLException s)
 		{
-			System.out.println("\nMySQL error.");
-			System.out.println(s);
+			notifications.add("\nMySQL error.");
+			notifications.add(s.getLocalizedMessage());
 		}
 	}
 	public int calculateOptimalTemperature()
 	{
-		System.out.println("Calculating Optimal Temperature...");
+		notifications.add("Calculating Optimal Temperature...");
 		int size = speciesData.size();
 		if(size != 0)
 		{
@@ -227,21 +238,22 @@ public class TemperatureRegulator extends Thread{
 				if (maxTemp < curTemp)
 					maxTemp = curTemp;
 			}
-			System.out.println("Optimal Temperature acquired: " + temp / size);
-			System.out.println("Min temp: " + minTemp);
-			System.out.println("Max temp: " + maxTemp);
+			notifications.add("Optimal Temperature acquired: " + temp / size);
+			notifications.add("Min temp: " + minTemp);
+			notifications.add("Max temp: " + maxTemp);
 			return temp / size; // average temperature
 		}
 		else
 		{
-			System.out.println("NO SPECIES DATA AVAILABLE FOR TEMPERATURE CALCULATION!");
+			notifications.add("NO SPECIES DATA AVAILABLE FOR TEMPERATURE CALCULATION!");
 			return 100;
 		}
 		
 	}
 	public void adjustTemperature()
 	{
-		//Need to find a way to override simulated controls so that user can switch chiller on and off
+		//Need to find a way to override simulated controls so that user 
+		//can switch chiller on and off
 		//and it won't case an issue with overrides
 		//if (curTemp < opTemp)
 		//{
@@ -253,19 +265,10 @@ public class TemperatureRegulator extends Thread{
 			if (chiller.isOn())
 				curTemp -= .1;
 		//}
-		System.out.printf("Adjusting Temp: %.1f%n", curTemp);	
-	}
-	public void setChiller(boolean onOrOff)
-	{
-		chiller.setOn(onOrOff);
-		System.out.println("Chiller is switching " + ( onOrOff == true ? "on" : "off"));
-		sendActions("Chiller turned " + (onOrOff ? "on" : "off"));
-	}
-	public void setHeater(boolean onOrOff)
-	{
-		heater.setOn(onOrOff);
-		System.out.println("Heater is switching " + ( onOrOff == true ? "on" : "off"));
-		sendActions("Heater turned " + (onOrOff ? "on" : "off"));
+		StringBuilder sb = new StringBuilder();
+		sb.append("Adjust temp: ");
+		sb.append(df.format(curTemp));
+		notifications.add(sb.toString());	
 	}
 	public void sendDataToMI()
 	{
@@ -278,5 +281,50 @@ public class TemperatureRegulator extends Thread{
 	public void sendNoticesToMI()
 	{
 		
+	}
+	public void setChiller(boolean onOrOff)
+	{
+		chiller.setOn(onOrOff);
+		notifications.add("Chiller is switching " + ( onOrOff == true ? "on" : "off"));
+		sendActions("Chiller turned " + (onOrOff ? "on" : "off"));
+	}
+	public Chiller getChiller()
+	{
+		return chiller;
+	}
+	public void setHeater(boolean onOrOff)
+	{
+		heater.setOn(onOrOff);
+		notifications.add("Heater is switching " + ( onOrOff == true ? "on" : "off"));
+		sendActions("Heater turned " + (onOrOff ? "on" : "off"));
+	}
+	public Heater getHeater()
+	{
+		return heater;
+	}
+	public void setAutomated(boolean onOrOff)
+	{
+		isAutomated = onOrOff;
+		notifications.add("Automation: " + ( onOrOff == true ? "on" : "off"));
+	}
+	public boolean isAutomated()
+	{
+		return isAutomated;
+	}
+	public double getOpTemp()
+	{
+		return opTemp;
+	}
+	public double getCurTemp()
+	{
+		return curTemp;
+	}
+	public double getMinTemp()
+	{
+		return minTemp;
+	}
+	public double getMaxtemp()
+	{
+		return maxTemp;
 	}
 }

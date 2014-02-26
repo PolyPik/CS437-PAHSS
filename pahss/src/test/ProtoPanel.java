@@ -9,6 +9,7 @@ import javax.swing.JList;
 import javax.swing.AbstractListModel;
 
 import java.awt.Dimension;
+import java.util.concurrent.Semaphore;
 
 import javax.swing.BorderFactory;
 import javax.swing.JScrollPane;
@@ -20,15 +21,17 @@ import javax.swing.JTextArea;
 import javax.swing.ListSelectionModel;
 
 public class ProtoPanel extends Thread{
-
+	
+	Semaphore s = new Semaphore(0);
 	private JFrame frmPahss;
 	private boolean isRunning = true;
 	private int fps = 20;
-	TemperatureRegulator tr = new TemperatureRegulator();
+	TemperatureRegulator tr = new TemperatureRegulator(s);
+	TempPanel TRPanel; 
 	long lastLoopTime = 0;
 	long refreshTime = 0;
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws InterruptedException {
 		ProtoPanel window = new ProtoPanel();
 		window.frmPahss.setVisible(true);
 		window.run();
@@ -61,24 +64,34 @@ public class ProtoPanel extends Thread{
 	}
 	/**
 	 * Create the application.
+	 * @throws InterruptedException 
 	 */
-	public ProtoPanel() {
+	public ProtoPanel() throws InterruptedException {
 		initialize();
 	}
 	public void update(long dt)
 	{
-		
+		refreshTime += dt;
+		if(refreshTime > 1000)
+		{
+			TRPanel.update();
+			refreshTime = 0;
+		}
+		//tr.getNotifications(); TODO DO THIS
 	}
 	/**
 	 * Initialize the contents of the frame.
+	 * @throws InterruptedException 
 	 */
-	private void initialize() {
+	private void initialize() throws InterruptedException {
 		frmPahss = new JFrame();
 		frmPahss.setTitle("PAHSS");
-		frmPahss.setBounds(100, 100, 720, 480);
+		frmPahss.setBounds(100, 100, 900, 600);
 		frmPahss.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmPahss.setResizable(false);
-		tr.start();
+		tr.start();// start the Temperature Regulator module
+		s.acquire();
+		
 		
 		JList<String> TankList = new JList<String>();
 		TankList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -114,7 +127,7 @@ public class ProtoPanel extends Thread{
 		JPanel CRPanel = new JPanel();
 		MainPanel.addTab("Chemistry", null, CRPanel, null);
 		
-		TempPanel TRPanel = new TempPanel(); 
+		TRPanel = new TempPanel(tr);
 		MainPanel.addTab("Temperature", null, TRPanel, null);
 		
 		JPanel FRPanel = new JPanel();

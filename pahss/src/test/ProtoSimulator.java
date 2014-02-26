@@ -1,11 +1,13 @@
 package test;
 
 import java.awt.Graphics;
+import java.util.concurrent.Semaphore;
 
 import javax.swing.JFrame;
 
 public class ProtoSimulator extends JFrame{
 
+	Semaphore s;
 	/**
 	 * 
 	 */
@@ -13,7 +15,7 @@ public class ProtoSimulator extends JFrame{
 	private boolean isRunning = true;
 	private int fps = 20;
 	int x = 0;
-	TemperatureRegulator tr = new TemperatureRegulator();
+	TemperatureRegulator tr = new TemperatureRegulator(s);
 	long lastLoopTime = 0;
 	long refreshTime = 0;
 	
@@ -55,7 +57,7 @@ public class ProtoSimulator extends JFrame{
         setResizable(false); 
         setDefaultCloseOperation(EXIT_ON_CLOSE); 
         setVisible(true); 
-        tr.start();
+        tr.start(); //start the Temperature Regulator Module
 	}
 	void update(long dt)
 	{
