@@ -22,8 +22,8 @@ public class EquipmentMonitor {
 }
 
 class EquipmentCheck extends Thread {
-	String equipmentName = "Unknown Equipment";//perhaps to store name of equipment from database later?
-	String errorNotice = "Equipment is broken! Fix immediately!";//perhaps to store error notice from database later
+	String equipmentName = "Unknown Equipment";
+	String errorNotice = "Equipment is broken! Fix immediately!";
 	int tank_id;
 	int equipment_id;
 	boolean isOperational = true;
@@ -32,6 +32,11 @@ class EquipmentCheck extends Thread {
 	EquipmentCheck(int tank_id, int equipment_id) {
 		this.tank_id = tank_id;
 		this.equipment_id = equipment_id;
+		/*
+		 * instead of all these if statements, equipmentName will take the
+		 * equipment id, look for it on the table equipment_checks in the
+		 * database, and assigns itself to whatever name it finds there
+		 */
 		if (equipment_id == 1)
 			equipmentName = "Heater";
 		else if (equipment_id == 2)
@@ -70,6 +75,11 @@ class EquipmentCheck extends Thread {
 			equipmentName = "Feeder food supply";
 		else if (equipment_id == 19)
 			equipmentName = "Chemical supply dispenser";
+		/*
+		 * The same process that equipmentName went through will also occur for
+		 * errorNotice, except it will use the value found in the error_message
+		 * field
+		 */
 		errorNotice = equipmentName + " is broken! Please fix immediately!";
 	}
 
@@ -107,16 +117,25 @@ class EquipmentCheck extends Thread {
 			 * below that will keep reading based on id's, or just use the code
 			 * that would access the database inside the booleans of the checks
 			 * below. More work on this is needed.
+			 * 
+			 * Basically, instead of using getOperational(), which is a boolean
+			 * that is toggled by user input, we will instead use the tank_id
+			 * and equipment_id of this object to find the corresponding boolean
+			 * value in the operational_status column of the equipment_status
+			 * table in the database. Alternatively, while the program is
+			 * running, we could set getOperational = boolean found in
+			 * operational_status of the equipment_status table.
 			 */
 
 			if (!getOperational() && !isChecked) {
-				System.out.println("ERROR: Tank " + tank_id + "'s " + equipmentName + " MALFUNCTION: "
-						+ errorNotice);
+				System.out.println("ERROR: Tank " + tank_id + "'s "
+						+ equipmentName + " MALFUNCTION: " + errorNotice);
 				setChecked(true);
 			}
 			if (getOperational() && isChecked) {
 				setChecked(false);
-				System.out.println("Error has been fixed on Tank " + tank_id + "'s " + equipmentName);
+				System.out.println("Error has been fixed on Tank " + tank_id
+						+ "'s " + equipmentName);
 			}
 
 			// *
@@ -148,7 +167,8 @@ class EquipmentCheck extends Thread {
 
 		EquipmentMonitor monitor = new EquipmentMonitor();
 		Scanner input = new Scanner(System.in);
-		System.out.println("Enter the number of tanks (preferably 1-3):");
+		System.out
+				.println("Enter the number of default tanks (preferably 1-3):");
 		int numberOfTanks = input.nextInt();
 
 		for (int t = 1; t <= numberOfTanks; t++) {
@@ -184,7 +204,22 @@ class EquipmentCheck extends Thread {
 		/*
 		 * The logic for this is nearly complete. This program needs to handle
 		 * the case for when new tanks/equipment are added. For each new tank,
-		 * 19 new equipment checks are added.
+		 * 19 new equipment checks are added to the database, which would mean
+		 * 19 new values must be added to the array list, and they must all be
+		 * filled. Not sure how to detect that, but here's what I think:
+		 * 
+		 * Have this program constantly check the state of the equipment_status
+		 * table. If, at any time, new tanks are added, then for each new tank,
+		 * 19 entries are added. Then this program will use the new entries'
+		 * tank_id and equipment_id to create a new EquipmentCheck object and
+		 * add it to the array list.
+		 * 
+		 * ALTERNATIVELY, if this program is going to be turned off whenever
+		 * tanks are added, then it would be better to recalculate the number of
+		 * tanks. In that case, this program needs to be changed such that
+		 * instead of asking the user how many tanks there are, it will instead
+		 * check the tank_database and count how many tanks there are, and then
+		 * just build the array list all over again.
 		 */
 	}
 }
