@@ -1,23 +1,102 @@
 package test;
 
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.util.Scanner;
 import java.util.ArrayList;
 
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.WindowConstants;
+
 public class EquipmentMonitor {
-	ArrayList<EquipmentCheck> equipmentCheckList = new ArrayList<EquipmentCheck>();
+	ArrayList<EquipmentCheck> EquipmentCheckList = new ArrayList<EquipmentCheck>();
 
 	public ArrayList<EquipmentCheck> getCheckList() {
-		return equipmentCheckList;
+		return EquipmentCheckList;
 	}
 
 	// replaces monitor.getCheckList.get(i);
 	public EquipmentCheck getCheckListValue(int i) {
-		return equipmentCheckList.get(i);
+		return EquipmentCheckList.get(i);
 	}
 
 	// replaces monitor.getCheckList.add(i);
 	public void addToCheckList(EquipmentCheck e) {
-		equipmentCheckList.add(e);
+		EquipmentCheckList.add(e);
+	}
+}
+
+class MonitorGUI {
+	static ArrayList<JLabel> textLabelList = new ArrayList<JLabel>();
+	static ArrayList<JTextArea> textAreaList = new ArrayList<JTextArea>();
+
+	public static void createWindow(int numTanks) {
+		JFrame myFrame = new JFrame("Equipment Monitor");
+
+		JLabel label;
+		myFrame.setLayout(new GridBagLayout());
+		GridBagConstraints c = new GridBagConstraints();
+		// natural height, maximum width
+		c.fill = GridBagConstraints.HORIZONTAL;
+
+		label = new JLabel("Equipment Monitor");
+		c.weightx = 0.5;
+		c.fill = GridBagConstraints.CENTER;
+		c.gridx = 0;
+		c.gridy = 0;
+		c.gridwidth = 3;
+		label.setFont(new Font("Serif", Font.BOLD, 30));
+		myFrame.add(label, c);
+
+		for (int i = 1; i <= numTanks; i++) {
+			JLabel labelT = new JLabel("Tank " + i);
+			c.weightx = 0.5;
+			c.fill = GridBagConstraints.HORIZONTAL;
+			c.gridx = i - 1;
+			c.gridy = 1;
+			labelT.setFont(new Font("Serif", Font.BOLD, 20));
+			textLabelList.add(labelT);
+			myFrame.add(labelT, c);
+		}
+
+		c.insets = new Insets(0, 5, 0, 5);
+
+		for (int i = 1; i <= numTanks; i++) {
+			JTextArea textArea = new JTextArea("Tank " + i + " data\n", 10, 10);
+			JScrollPane scrollPane = new JScrollPane(textArea);
+			c.fill = GridBagConstraints.HORIZONTAL;
+			c.weightx = 0.5;
+			c.gridwidth = 1;
+			c.gridx = i - 1;
+			c.gridy = 2;
+			textArea.setEditable(false);
+			textArea.setRows(20);
+			textArea.setColumns(20);
+			textAreaList.add(textArea);
+			myFrame.getContentPane().add(scrollPane, c);
+		}
+
+		JLabel labelEnd = new JLabel("End of window");
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.ipady = 0; // reset to default
+		c.weighty = 1.0; // request any extra vertical space
+		c.anchor = GridBagConstraints.PAGE_END; // bottom of space
+		c.insets = new Insets(10, 0, 0, 0); // top padding
+		c.gridx = 1; // aligned with button 2
+		c.gridwidth = 2; // 2 columns wide
+		c.gridy = 3; // third row
+		myFrame.add(labelEnd, c);
+
+		myFrame.setSize(800, 500);
+		myFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		myFrame.setLocationRelativeTo(null);
+		myFrame.pack();
+		myFrame.setVisible(true);
 	}
 }
 
@@ -137,12 +216,18 @@ class EquipmentCheck extends Thread {
 			 */
 
 			if (!getOperational() && !isChecked) {
+				MonitorGUI.textAreaList.get(tank_id - 1).append(
+						"ERROR: Tank " + tank_id + "'s " + equipmentName
+								+ " MALFUNCTION: " + errorNotice + "\n");
 				System.out.println("ERROR: Tank " + tank_id + "'s "
 						+ equipmentName + " MALFUNCTION: " + errorNotice);
 				setChecked(true);
 			}
 			if (getOperational() && isChecked) {
 				setChecked(false);
+				MonitorGUI.textAreaList.get(tank_id - 1).append(
+						"Error has been fixed on Tank " + tank_id + "'s "
+								+ equipmentName + "\n");
 				System.out.println("Error has been fixed on Tank " + tank_id
 						+ "'s " + equipmentName);
 			}
@@ -160,7 +245,7 @@ class EquipmentCheck extends Thread {
 	public static void main(String[] args) {
 
 		/*
-		 * The EquipmentMonitor class has an ArrayList equipmentCheckList. The
+		 * The EquipmentMonitor class has an ArrayList EquipmentCheckList. The
 		 * main method of EquipmenentCheck will create an object of type
 		 * EquipmentMonitor, and proceed to add elements to it of type
 		 * EquipmentCheck. When we implement the database, these objects will
@@ -194,6 +279,8 @@ class EquipmentCheck extends Thread {
 
 		for (int i = 0; i < monitor.getCheckList().size(); i++)
 			monitor.getCheckListValue(i).start();
+
+		MonitorGUI.createWindow(numberOfTanks);
 
 		/*
 		 * This is a way to test the true/false case. Need to be able to
