@@ -17,20 +17,25 @@ import javax.swing.JTextArea;
 import javax.swing.WindowConstants;
 
 public class EquipmentMonitor {
-	ArrayList<EquipmentCheck> EquipmentCheckList = new ArrayList<EquipmentCheck>();
-
-	public ArrayList<EquipmentCheck> getCheckList() {
-		return EquipmentCheckList;
+	EquipmentCheck[][] equipmentCheckList;
+	
+	public EquipmentMonitor(int numTanks, int numChecks) {
+		equipmentCheckList = new EquipmentCheck[numTanks][numChecks];
+	}
+	
+	//returns entire array
+	public EquipmentCheck[][] getChecks() {
+		return equipmentCheckList;
 	}
 
-	// replaces monitor.getCheckList.get(i);
-	public EquipmentCheck getCheckListValue(int i) {
-		return EquipmentCheckList.get(i);
+	//returns the value in the array of index [t][e]
+	public EquipmentCheck getChecksValue(int t, int e) {
+		return equipmentCheckList[t][e];
 	}
 
-	// replaces monitor.getCheckList.add(i);
-	public void addToCheckList(EquipmentCheck e) {
-		EquipmentCheckList.add(e);
+	//set the value of the array index [t][e] to c
+	public void addToChecks(EquipmentCheck c, int t, int e) {
+		equipmentCheckList[t][e] = c;
 	}
 }
 
@@ -241,11 +246,9 @@ class EquipmentCheck extends Thread {
 			if (!getOperational() && !isChecked) {
 				MonitorGUI.textAreaList.get(tank_id - 1).append(
 						dateOut + " " + timeOut + "\nERROR: Tank " + tank_id
-								+ "'s " + equipmentName + " MALFUNCTION: "
-								+ errorNotice + "\n\n");
+								+ "'s " + errorNotice + "\n\n");
 				System.out.println(dateOut + " " + timeOut + "\nERROR: Tank "
-						+ tank_id + "'s " + equipmentName + " MALFUNCTION: "
-						+ errorNotice);
+						+ tank_id + "'s " + errorNotice);
 				setChecked(true);
 			}
 			if (getOperational() && isChecked) {
@@ -259,7 +262,7 @@ class EquipmentCheck extends Thread {
 						+ "'s " + equipmentName);
 			}
 
-			// *
+			//*
 			try {
 				sleep(2000);
 			} catch (InterruptedException e) {
@@ -293,21 +296,23 @@ class EquipmentCheck extends Thread {
 		 * 
 		 * select count(id) from tank_database;
 		 */
-		EquipmentMonitor monitor = new EquipmentMonitor();
+
+		int numEquipmentChecks = 19;
 		Scanner input = new Scanner(System.in);
-		System.out
-				.println("Enter the number of default tanks (preferably 1-3):");
+		System.out.println("Enter the number of default tanks:");
 		int numberOfTanks = input.nextInt();
-
-		for (int t = 1; t <= numberOfTanks; t++) {
-			for (int e = 1; e <= 19; e++)
-				monitor.addToCheckList(new EquipmentCheck(t, e));
-		}
-
-		for (int i = 0; i < monitor.getCheckList().size(); i++)
-			monitor.getCheckListValue(i).start();
+		EquipmentMonitor mon = new EquipmentMonitor(numberOfTanks, numEquipmentChecks);
+		
+		for (int t = 1; t <= numberOfTanks; t++)
+			for (int e = 1; e <= numEquipmentChecks; e++)
+				mon.addToChecks(new EquipmentCheck(t,e), t-1, e-1);
+		
+		for (int t = 1; t <= numberOfTanks; t++)
+			for (int e = 1; e <= numEquipmentChecks; e++)
+				mon.getChecksValue(t-1,e-1).start();
 
 		MonitorGUI.createWindow(numberOfTanks);
+		
 
 		/*
 		 * This is a way to test the true/false case. Need to be able to
@@ -326,17 +331,25 @@ class EquipmentCheck extends Thread {
 		 */
 
 		System.out.println("All equipment currently working.");
-		System.out.println("Input numbers 0 through "
-				+ (numberOfTanks * 19 - 1)
-				+ " to break/fix equipment and display error/fix message:");
-		while (true) {
-			int boolSwitch = input.nextInt();
-			if (boolSwitch >= 0 && boolSwitch < monitor.getCheckList().size())
-				monitor.getCheckListValue(boolSwitch)
-						.setOperational(
-								!monitor.getCheckListValue(boolSwitch)
-										.getOperational());
-		}
+		System.out.println("You'll be inputting numbers to break/fix equipment and display error/fix messages.");
+		while(true){
+			System.out.println("Input a valid tank number from 1 to " + numberOfTanks + ": ");
+			int tankNo = input.nextInt();
+			if (tankNo >= 1 && tankNo <= numberOfTanks){
+				System.out.println("Input a valid equipment check number from 1 to " + numEquipmentChecks + ":");
+				int checkNo = input.nextInt();
+				if (checkNo >= 1 && checkNo <= numEquipmentChecks)
+				{
+					mon.getChecksValue(tankNo-1, checkNo-1).setOperational(!mon.getChecksValue(tankNo-1,checkNo-1).getOperational());
+				}
+				else{
+					System.out.println("This equipment check does not exist. Please start again.");
+				}
+			}
+			else{
+				System.out.println("This tank does not exist. Please start again.");
+			}
+		}		
 
 		/*
 		 * The logic for this is nearly complete. This program needs to handle
