@@ -16,16 +16,13 @@ import javax.swing.GroupLayout.Alignment;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.table.DefaultTableModel;
 
-import sch.FeederEntry;
-import sch.LightDialog;
-import sch.LightEntry;
-import sch.LightTM;
-import sch.SCHEntry;
-import sch.SCHInterval;
-import sch.SCHModel;
+import sch.*;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.util.HashMap;
 import java.util.List;
 
@@ -37,11 +34,10 @@ public class SCHPanel extends JPanel {
 	 * 
 	 */
 	private static final long serialVersionUID = -9216093653080287746L;
+	private LightEditDialog editdialog1;
 	private JTable intervalTable;
-	private LightDialog testdialog1;
 	private SCHModel currentSCHModel;
 	JList<SCHEntry> entryList;
-	JTable IntervalTable2;
 	DefaultListModel<SCHEntry> EntryLM;
 	HashMap<SCHEntry,DefaultListModel<SCHInterval>> EntryIntervalMap;
 	HashMap<LightEntry,LightTM> LightIntervalMap;
@@ -50,7 +46,18 @@ public class SCHPanel extends JPanel {
 	/**
 	 * Create the panel.
 	 */
-	public SCHPanel() {
+	public SCHPanel(JFrame frame) {
+		editdialog1 = new LightEditDialog(frame,true);
+		editdialog1.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosed(WindowEvent e) {
+				// TODO Auto-generated method stub
+				super.windowClosed(e);
+				//System.out.println("Refresh");
+				((LightTM)intervalTable.getModel()).resyncEntry();
+				((LightTM)intervalTable.getModel()).fireTableDataChanged();
+			}
+		});
 		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		
 		JScrollPane EntryScrollPane = new JScrollPane();
@@ -71,52 +78,57 @@ public class SCHPanel extends JPanel {
 		JPanel panel = new JPanel();
 		add(panel);
 		
+		JPanel buttonPanel = new JPanel();
+		add(buttonPanel);
+		
 		JButton startButton = new JButton("Start Schedule");
+		startButton.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				entryList.getSelectedValue().startSchedulers();
+			}
+		});
 		
 		JButton stopButton = new JButton("Stop Schedule");
 		stopButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				entryList.getSelectedValue().stopSchedulers();
 			}
 		});
 		
-		JButton addButton = new JButton("Add Interval");
-		addButton.addActionListener(new ActionListener() {
+		JButton editButton = new JButton("Edit Schedule");
+		editButton.addActionListener(new ActionListener() {
+			
+			@Override
 			public void actionPerformed(ActionEvent e) {
+				editdialog1.loadEntry(LightIntervalMap.get((LightEntry)entryList.getSelectedValue()));
+				editdialog1.setVisible(true);
 			}
 		});
-		
-		JButton removeButton = new JButton("Remove Interval");
-		
-		JButton editButton = new JButton("Edit Interval");
-		GroupLayout gl_panel = new GroupLayout(panel);
-		gl_panel.setHorizontalGroup(
-			gl_panel.createParallelGroup(Alignment.TRAILING)
-				.addGroup(gl_panel.createSequentialGroup()
+		GroupLayout gl_buttonPanel = new GroupLayout(buttonPanel);
+		gl_buttonPanel.setHorizontalGroup(
+			gl_buttonPanel.createParallelGroup(Alignment.TRAILING)
+				.addGroup(gl_buttonPanel.createSequentialGroup()
 					.addContainerGap()
-					.addGroup(gl_panel.createParallelGroup(Alignment.LEADING)
-						.addComponent(startButton, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 138, Short.MAX_VALUE)
-						.addComponent(stopButton, GroupLayout.DEFAULT_SIZE, 138, Short.MAX_VALUE)
-						.addComponent(addButton, GroupLayout.PREFERRED_SIZE, 138, GroupLayout.PREFERRED_SIZE)
-						.addComponent(removeButton, GroupLayout.PREFERRED_SIZE, 138, GroupLayout.PREFERRED_SIZE)
-						.addComponent(editButton, GroupLayout.PREFERRED_SIZE, 138, GroupLayout.PREFERRED_SIZE))
+					.addGroup(gl_buttonPanel.createParallelGroup(Alignment.LEADING)
+						.addComponent(editButton, GroupLayout.DEFAULT_SIZE, 138, Short.MAX_VALUE)
+						.addComponent(stopButton, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 138, Short.MAX_VALUE)
+						.addComponent(startButton, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 138, Short.MAX_VALUE))
 					.addContainerGap())
 		);
-		gl_panel.setVerticalGroup(
-			gl_panel.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_panel.createSequentialGroup()
-					.addContainerGap()
+		gl_buttonPanel.setVerticalGroup(
+			gl_buttonPanel.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_buttonPanel.createSequentialGroup()
+					.addGap(159)
 					.addComponent(startButton, GroupLayout.PREFERRED_SIZE, 38, GroupLayout.PREFERRED_SIZE)
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addComponent(stopButton, GroupLayout.PREFERRED_SIZE, 38, GroupLayout.PREFERRED_SIZE)
-					.addGap(48)
-					.addComponent(addButton, GroupLayout.PREFERRED_SIZE, 38, GroupLayout.PREFERRED_SIZE)
-					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(removeButton, GroupLayout.PREFERRED_SIZE, 38, GroupLayout.PREFERRED_SIZE)
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addComponent(editButton, GroupLayout.PREFERRED_SIZE, 38, GroupLayout.PREFERRED_SIZE)
-					.addContainerGap(178, Short.MAX_VALUE))
+					.addContainerGap(161, Short.MAX_VALUE))
 		);
-		panel.setLayout(gl_panel);
+		buttonPanel.setLayout(gl_buttonPanel);
 
 	}
 	
@@ -124,10 +136,8 @@ public class SCHPanel extends JPanel {
 		currentSCHModel = o;
 		fillListModels();
 		entryList.setSelectedIndex(0);
-		//System.out.println(LightIntervalMap.get((LightEntry)entryList.getSelectedValue()).toString());
 		intervalTable.setModel(LightIntervalMap.get((LightEntry)entryList.getSelectedValue()));
-		//IntervalTable.setModel(EntryIntervalMap.get(EntryList.getSelectedValue()));
-		//testdialog1.setTableModel(LightIntervalMap.get((LightEntry)EntryList.getSelectedValue()));
+		//editdialog1.setTableModel(LightIntervalMap.get((LightEntry)entryList.getSelectedValue()));
 	}
 	
 	private void fillListModels(){

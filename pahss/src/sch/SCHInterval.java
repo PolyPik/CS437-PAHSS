@@ -1,10 +1,10 @@
 package sch;
 
 public class SCHInterval implements Comparable<SCHInterval>{
-	private int start_hour;
-	private int start_minute;
-	private int stop_hour;
-	private int stop_minute;
+	protected int start_hour;
+	protected int start_minute;
+	protected int stop_hour;
+	protected int stop_minute;
 	
 	public SCHInterval() {
 	}
