@@ -1,7 +1,5 @@
 package test;
 
-//TODO: DOUBLE CHECK THAT NOTIFICATIONS WORK
-
 import java.sql.*;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -24,18 +22,20 @@ public class TemperatureRegulator extends Thread{
 	private static int MODULE = 4;
 	private ArrayList<Fish> speciesData;
 	private ArrayList<TankID> tankIDS;
-	private ArrayList<String> notifications;
+	private ArrayList<String> notifications = new ArrayList<String>();
 	private Heater heater = new Heater();
 	private Chiller chiller = new Chiller();
 	private boolean isRunning = true;
 	private boolean isAutomated = true;
+	private boolean isScheduled = false;
 	private int fps = 20;
 	long lastLoopTime = 0;
 	long refreshTime = 0;
 	private double minTemp = 1000; 
 	private double maxTemp = 0;
 	private double opTemp = 0;
-	private double curTemp = 76; // get curTemp from one of the databases
+	private double curTemp = 79; // get curTemp from one of the databases
+	private double desiredTemp = 0;
 	DecimalFormat df = new DecimalFormat("#.##");
 	Semaphore s;
 	
@@ -84,7 +84,7 @@ public class TemperatureRegulator extends Thread{
 		{
 			Fish fish;
 			Connection connection = null;
-			System.out.println("Connecting to species_database...");
+			notifications.add("Connecting to species_database...");
 			connection = DriverManager.getConnection(url, username, password);
 			Statement stmt = connection.createStatement();
 			for(int i = 0; i < tankIDS.size(); i++)
@@ -105,13 +105,12 @@ public class TemperatureRegulator extends Thread{
 				}
 			}
 			connection.close();
-			System.out.println("Species Information Acquired");
-			System.out.println("Connection closed.");
+			notifications.add("Species Information Acquired...Connection closed.");
 		}
 		catch(SQLException s)
 		{
-			System.out.println("\nMySQL error.");
-			System.out.println(s);
+			notifications.add("\nMySQL error.");
+			notifications.add(s.getLocalizedMessage());
 		}
 		
 		return tStock;
@@ -124,7 +123,7 @@ public class TemperatureRegulator extends Thread{
 		{
 			TankID id;
 			Connection connection = null;
-			System.out.println("Connecting to tank_stock database...");
+			notifications.add("Connecting to tank_stock database...");
 			connection = DriverManager.getConnection(url, username, password);
 			Statement stmt = connection.createStatement();
 			String query = "select * from tank_stock";
@@ -138,13 +137,12 @@ public class TemperatureRegulator extends Thread{
 				tStock.add(id);
 			}
 			connection.close();
-			System.out.println("Tank Stock Acquired");
-			System.out.println("Connection closed.");
+			notifications.add("Tank Stock Acquired...Connection closed.");
 		}
 		catch(SQLException s)
 		{
-			System.out.println("\nMySQL error.");
-			System.out.println(s);
+			notifications.add("\nMySQL error.");
+			notifications.add(s.getLocalizedMessage());
 		}
 		
 		return tStock;
@@ -154,9 +152,10 @@ public class TemperatureRegulator extends Thread{
 		refreshTime += dt;
 		if(refreshTime > 1000) // update once a second only, not every frame
 		{
-			if(((int)curTemp != (int)opTemp) && isAutomated)
+			if(((int)curTemp != (int)opTemp) && isAutomated
+				 || ((int)curTemp != desiredTemp) && isScheduled)
 			{
-				if ((int)curTemp < (int)opTemp){
+				if ((int)curTemp < (int)opTemp || (int)curTemp < (int)desiredTemp){
 					if(!heater.isOn()){
 						setHeater(true);
 						setChiller(false);
@@ -185,13 +184,11 @@ public class TemperatureRegulator extends Thread{
 			if(!isAutomated && (heater.isOn() || chiller.isOn()))
 				adjustTemperature();
 			
+			//if(isScheduled && (heater.isOn() || chiller.isOn()))
+			//	adjustTemperature();
 			refreshTime = 0;
 		}
 		
-	}
-	public void getTemperature()
-	{
-		//access database to get current tank temperature
 	}
 	public void sendActions(String action)
 	{
@@ -212,7 +209,7 @@ public class TemperatureRegulator extends Thread{
 			stmt.executeUpdate(insert);
 			
 			connection.close();
-			notifications.add("Action logged. Connection closed.");
+			notifications.add("Action logged...Connection closed.");
 		}
 		catch(SQLException s)
 		{
@@ -252,35 +249,16 @@ public class TemperatureRegulator extends Thread{
 	}
 	public void adjustTemperature()
 	{
-		//Need to find a way to override simulated controls so that user 
-		//can switch chiller on and off
-		//and it won't case an issue with overrides
-		//if (curTemp < opTemp)
-		//{
-			if (heater.isOn())
-				curTemp+= .1;
-		//}
-		//else if (curTemp > opTemp)
-		//{
-			if (chiller.isOn())
-				curTemp -= .1;
-		//}
-		StringBuilder sb = new StringBuilder();
+		if (heater.isOn())
+			curTemp+= .1;
+	
+		if (chiller.isOn())
+			curTemp -= .1;
+		
+		/*StringBuilder sb = new StringBuilder();
 		sb.append("Adjust temp: ");
 		sb.append(df.format(curTemp));
-		notifications.add(sb.toString());	
-	}
-	public void sendDataToMI()
-	{
-		
-	}
-	public void sendSettingsToMI()
-	{
-		
-	}
-	public void sendNoticesToMI()
-	{
-		
+		notifications.add(sb.toString());	*/
 	}
 	public void setChiller(boolean onOrOff)
 	{
@@ -326,5 +304,26 @@ public class TemperatureRegulator extends Thread{
 	public double getMaxtemp()
 	{
 		return maxTemp;
+	}
+	public boolean getScheduled()
+	{
+		return isScheduled;
+	}
+	public void setScheduled(double temp)
+	{
+		desiredTemp = temp;
+		if(desiredTemp != curTemp)
+		{
+			isScheduled = true;
+			isAutomated = false;
+		}
+	}
+	public ArrayList<String> getNotifications()
+	{
+		return notifications;
+	}
+	public void clearNotifications()
+	{
+		notifications.clear();
 	}
 }

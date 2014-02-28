@@ -9,6 +9,7 @@ import javax.swing.JList;
 import javax.swing.AbstractListModel;
 
 import java.awt.Dimension;
+import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
 
 import javax.swing.BorderFactory;
@@ -19,6 +20,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JTextArea;
 import javax.swing.ListSelectionModel;
+import javax.swing.text.DefaultCaret;
 
 public class ProtoPanel extends Thread{
 	
@@ -30,6 +32,8 @@ public class ProtoPanel extends Thread{
 	TempPanel TRPanel; 
 	long lastLoopTime = 0;
 	long refreshTime = 0;
+	JTextArea textArea;
+	ArrayList<String> notifications = new ArrayList<String>();
 	
 	public static void main(String[] args) throws InterruptedException {
 		ProtoPanel window = new ProtoPanel();
@@ -75,9 +79,17 @@ public class ProtoPanel extends Thread{
 		if(refreshTime > 1000)
 		{
 			TRPanel.update();
+
+			notifications = tr.getNotifications();
+
+			if(!notifications.isEmpty())
+				for(int i = 0; i < notifications.size(); i++)
+				{
+					textArea.append("\n" + notifications.get(i));
+				}
 			refreshTime = 0;
+			tr.clearNotifications();
 		}
-		//tr.getNotifications(); TODO DO THIS
 	}
 	/**
 	 * Initialize the contents of the frame.
@@ -95,15 +107,15 @@ public class ProtoPanel extends Thread{
 		
 		JList<String> TankList = new JList<String>();
 		TankList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		TankList.setBorder(BorderFactory.createTitledBorder("Tanks"));
+		TankList.setBorder(BorderFactory.createTitledBorder("Tests"));
 		TankList.setModel(new AbstractListModel<String>() {
 			/**
 			 * 
 			 */
 			private static final long serialVersionUID = 1L;
-			String[] values = new String[] {"Tank 1", "Tank 2", "Tank 3", "Tank 4", "Tank 5", 
+			String[] values = new String[] {"Test 1", "Testk 2", "Test 3", /*"Tank 4", "Tank 5", 
 					"Tank 6", "Tank 7", "Tank 8", "Tank 9", "Tank 10","Tank 11", "Tank 12", "Tank 13", 
-					"Tank 14", "Tank 15", "Tank 16", "Tank 17", "Tank 18", "Tank 19", "Tank 20"};
+					"Tank 14", "Tank 15", "Tank 16", "Tank 17", "Tank 18", "Tank 19", "Tank 20"*/};
 			public int getSize() {
 				return values.length;
 			}
@@ -162,9 +174,11 @@ public class ProtoPanel extends Thread{
 		
 		JPanel notificationArea = new JPanel();
 		
-		JTextArea textArea = new JTextArea(5,55);
+		textArea = new JTextArea(5,55);
 		textArea.setLineWrap(true);
 		textArea.setEditable(false);
+		DefaultCaret caret = (DefaultCaret)textArea.getCaret();
+		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 		
 		JScrollPane areaScrollPane = new JScrollPane(textArea);
 		areaScrollPane.setVerticalScrollBarPolicy(
@@ -174,6 +188,7 @@ public class ProtoPanel extends Thread{
 		notificationArea.add(areaScrollPane);
 		notificationArea.setBorder(BorderFactory.createTitledBorder("Notifications"));
 		frmPahss.getContentPane().add(notificationArea, BorderLayout.SOUTH);
+		
 	}
 
 }
