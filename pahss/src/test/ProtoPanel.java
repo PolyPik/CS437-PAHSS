@@ -9,10 +9,13 @@ import javax.swing.JList;
 import javax.swing.AbstractListModel;
 
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
 
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JMenuBar;
@@ -28,6 +31,7 @@ public class ProtoPanel extends Thread{
 	private JFrame frmPahss;
 	private boolean isRunning = true;
 	private int fps = 20;
+	MIPanel miPanel = new MIPanel();
 	TemperatureRegulator tr = new TemperatureRegulator(s);
 	TempPanel TRPanel; 
 	long lastLoopTime = 0;
@@ -131,6 +135,9 @@ public class ProtoPanel extends Thread{
 		
 		frmPahss.getContentPane().add(MainPanel, BorderLayout.CENTER);
 		
+		miPanel = new MIPanel();
+		MainPanel.addTab("Management", null, miPanel, null);
+		
 		JPanel SCHPanel = new JPanel();
 		MainPanel.addTab("Scheduler", null, SCHPanel, null);
 		
@@ -146,7 +153,7 @@ public class ProtoPanel extends Thread{
 		JPanel EMPanel = new JPanel();
 		MainPanel.addTab("Equipment", null, EMPanel, null);
 		
-		MainPanel.setSelectedIndex(2);
+		//MainPanel.setSelectedIndex(2);
 		
 		JMenuBar MenuBar = new JMenuBar();
 		frmPahss.setJMenuBar(MenuBar);
@@ -186,6 +193,18 @@ public class ProtoPanel extends Thread{
 		areaScrollPane.setPreferredSize(new Dimension(700, 90));
 		
 		notificationArea.add(areaScrollPane);
+		
+		JButton clearButton = new JButton("Clear Log");
+		notificationArea.add(clearButton);
+		
+		clearButton.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent event)
+			{
+					textArea.setText("");
+			}
+		}
+		);
+		
 		notificationArea.setBorder(BorderFactory.createTitledBorder("Notifications"));
 		frmPahss.getContentPane().add(notificationArea, BorderLayout.SOUTH);
 		

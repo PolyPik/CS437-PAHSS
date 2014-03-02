@@ -126,7 +126,7 @@ public class TempPanel extends JPanel{
 		statusPanelB.add(chillerStatus);
 		
 		statusPanel.setLayout(new BoxLayout(statusPanel, BoxLayout.Y_AXIS));
-		statusPanel.setBorder(BorderFactory.createTitledBorder("TR Module Status"));
+		statusPanel.setBorder(BorderFactory.createTitledBorder("Module Status"));
 		statusPanel.add(statusPanelA);
 		statusPanel.add(statusPanelB);
 		
