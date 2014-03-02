@@ -16,8 +16,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
-
-//TODO: TEMPERATURE SET BUTTON IS WONKY FIX
 public class TempPanel extends JPanel{
 	/**
 	 * 
@@ -78,6 +76,7 @@ public class TempPanel extends JPanel{
 		OptionListener ol = new OptionListener();
 		tempUpButton.addActionListener(ol);
 		tempDownButton.addActionListener(ol);
+		tempSetButton.addActionListener(ol);
 		heaterOn.addActionListener(ol);
 		heaterOff.addActionListener(ol);
 		chillerOn.addActionListener(ol);
@@ -186,7 +185,10 @@ public class TempPanel extends JPanel{
 	            if(source.equals(heaterOn))
 	            {
 	            	if(!tr.getHeater().isOn())
+	            	{
 	            		tr.setHeater(true);
+	            		tr.turnOffScheduled();
+	            	}
 	            }
 	            if(source.equals(heaterOff))
 	            {
@@ -196,7 +198,10 @@ public class TempPanel extends JPanel{
 	            if(source.equals(chillerOn))
 	            {
 	            	if(!tr.getChiller().isOn())
+	            	{
 	            		tr.setChiller(true);
+	            		tr.turnOffScheduled();
+	            	}
 	            }
 	            if(source.equals(chillerOff))
 	            {

@@ -16,6 +16,7 @@ class TankID{
 };
 public class TemperatureRegulator extends Thread{
 	
+	private final static double EPSILON = .0000001;
 	static String url = "jdbc:mysql://173.247.244.100:3306/asauce5_aquarium";
 	static String username = "asauce5_cs437";
 	static String password = "cs437pahss";
@@ -34,7 +35,7 @@ public class TemperatureRegulator extends Thread{
 	private double minTemp = 1000; 
 	private double maxTemp = 0;
 	private double opTemp = 0;
-	private double curTemp = 79; // get curTemp from one of the databases
+	private double curTemp = 78; 
 	private double desiredTemp = 0;
 	DecimalFormat df = new DecimalFormat("#.##");
 	Semaphore s;
@@ -73,7 +74,6 @@ public class TemperatureRegulator extends Thread{
 		speciesData = getSpeciesData();
 		opTemp = calculateOptimalTemperature();
 		notifications.add("Temperature Regulator initialized");
-		//curTemp = some value from a database
 		s.release();
 	}
 	public ArrayList<Fish> getSpeciesData()
@@ -152,16 +152,16 @@ public class TemperatureRegulator extends Thread{
 		refreshTime += dt;
 		if(refreshTime > 1000) // update once a second only, not every frame
 		{
-			if(((int)curTemp != (int)opTemp) && isAutomated
-				 || ((int)curTemp != desiredTemp) && isScheduled)
+			if((!isEqual(curTemp, opTemp)) && isAutomated
+				 || (!isEqual(curTemp, desiredTemp)) && isScheduled)
 			{
-				if ((int)curTemp < (int)opTemp || (int)curTemp < (int)desiredTemp){
+				if ((lessThan(curTemp, opTemp) && isAutomated) || (lessThan(curTemp, desiredTemp)) && isScheduled){
 					if(!heater.isOn()){
 						setHeater(true);
 						setChiller(false);
 					}
 				}
-				else{
+				else if((greaterThan(curTemp, opTemp) && isAutomated) || (greaterThan(curTemp, desiredTemp)) && isScheduled){
 					if(!chiller.isOn()){
 						setChiller(true);
 						setHeater(false);
@@ -173,7 +173,7 @@ public class TemperatureRegulator extends Thread{
 			}
 			else 
 			{
-				if(isAutomated)
+				if(isAutomated || isScheduled)
 				{
 					if(heater.isOn())
 						setHeater(false);
@@ -181,11 +181,10 @@ public class TemperatureRegulator extends Thread{
 						setChiller(false);
 				}
 			}
-			if(!isAutomated && (heater.isOn() || chiller.isOn()))
+
+			if(!isScheduled && !isAutomated && (heater.isOn() || chiller.isOn()))
 				adjustTemperature();
 			
-			//if(isScheduled && (heater.isOn() || chiller.isOn()))
-			//	adjustTemperature();
 			refreshTime = 0;
 		}
 		
@@ -283,6 +282,11 @@ public class TemperatureRegulator extends Thread{
 	public void setAutomated(boolean onOrOff)
 	{
 		isAutomated = onOrOff;
+		if(heater.isOn())
+			setHeater(false);
+		if(chiller.isOn())
+			setChiller(false);
+		
 		notifications.add("Automation: " + ( onOrOff == true ? "on" : "off"));
 	}
 	public boolean isAutomated()
@@ -318,6 +322,10 @@ public class TemperatureRegulator extends Thread{
 			isAutomated = false;
 		}
 	}
+	public void turnOffScheduled()
+	{
+		isScheduled = false;
+	}
 	public ArrayList<String> getNotifications()
 	{
 		return notifications;
@@ -325,5 +333,28 @@ public class TemperatureRegulator extends Thread{
 	public void clearNotifications()
 	{
 		notifications.clear();
+	}
+	boolean isEqual(double d1, double d2)
+	{
+		return Math.abs(d1 - d2) < EPSILON * Math.max(Math.abs(d1), Math.abs(d2));
+	}
+	boolean lessThan(double d1, double d2)
+	{
+		int c = Double.compare(d1, d2);
+		
+		if(c < 0)
+			return true;
+		
+		return false;
+		
+	}
+	boolean greaterThan(double d1, double d2)
+	{
+		int c = Double.compare(d1, d2);
+		
+		if(c > 0)
+			return true;
+		
+		return false;
 	}
 }

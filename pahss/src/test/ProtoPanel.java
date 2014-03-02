@@ -85,7 +85,7 @@ public class ProtoPanel extends Thread{
 			if(!notifications.isEmpty())
 				for(int i = 0; i < notifications.size(); i++)
 				{
-					textArea.append("\n" + notifications.get(i));
+					textArea.append(notifications.get(i) + "\n");
 				}
 			refreshTime = 0;
 			tr.clearNotifications();
@@ -107,15 +107,13 @@ public class ProtoPanel extends Thread{
 		
 		JList<String> TankList = new JList<String>();
 		TankList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		TankList.setBorder(BorderFactory.createTitledBorder("Tests"));
+		TankList.setBorder(BorderFactory.createTitledBorder("Tanks"));
 		TankList.setModel(new AbstractListModel<String>() {
 			/**
 			 * 
 			 */
 			private static final long serialVersionUID = 1L;
-			String[] values = new String[] {"Test 1", "Testk 2", "Test 3", /*"Tank 4", "Tank 5", 
-					"Tank 6", "Tank 7", "Tank 8", "Tank 9", "Tank 10","Tank 11", "Tank 12", "Tank 13", 
-					"Tank 14", "Tank 15", "Tank 16", "Tank 17", "Tank 18", "Tank 19", "Tank 20"*/};
+			String[] values = new String[] {"Tank 1", "Tank 2", "Tank 3"};
 			public int getSize() {
 				return values.length;
 			}
@@ -130,7 +128,7 @@ public class ProtoPanel extends Thread{
 		frmPahss.getContentPane().add(tankScrollPane, BorderLayout.WEST);
 		
 		JTabbedPane MainPanel = new JTabbedPane(JTabbedPane.TOP);
-		//MainPanel.setSelectedIndex(1);
+		
 		frmPahss.getContentPane().add(MainPanel, BorderLayout.CENTER);
 		
 		JPanel SCHPanel = new JPanel();
@@ -147,6 +145,8 @@ public class ProtoPanel extends Thread{
 		
 		JPanel EMPanel = new JPanel();
 		MainPanel.addTab("Equipment", null, EMPanel, null);
+		
+		MainPanel.setSelectedIndex(2);
 		
 		JMenuBar MenuBar = new JMenuBar();
 		frmPahss.setJMenuBar(MenuBar);
