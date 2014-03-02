@@ -1,4 +1,8 @@
-package sch;
+package sch.light;
+
+import sch.SCHInterval;
+
+
 
 public class LightInterval extends SCHInterval{
 	private double lum;
@@ -7,9 +11,8 @@ public class LightInterval extends SCHInterval{
 		super();
 	}
 
-	public LightInterval(int start_hour, int start_minute, int stop_hour,
-			int stop_minute, double lum) {
-		super(start_hour, start_minute, stop_hour, stop_minute);
+	public LightInterval(int start_hour, int start_minute, double lum) {
+		super(start_hour, start_minute);
 		this.lum = lum;
 	}
 	
@@ -23,7 +26,7 @@ public class LightInterval extends SCHInterval{
 	
 	protected LightInterval clone() throws CloneNotSupportedException {
 		// TODO Auto-generated method stub
-		LightInterval clone = new LightInterval(start_hour, start_minute, stop_hour, stop_minute, lum);
+		LightInterval clone = new LightInterval(start_hour, start_minute, lum);
 		return clone;
 	}
 }

@@ -1,4 +1,4 @@
-package sch;
+package sch.feeder;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -19,23 +19,25 @@ import javax.swing.JTable;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 
+import sch.light.LightTM;
 
-public class LightEditDialog extends JDialog implements ActionListener{
+
+public class FeederEditDialog extends JDialog implements ActionListener{
 	private static final long serialVersionUID = -5954386544326168721L;
 	private final JPanel contentPanel = new JPanel();
 	private JButton addButton;
 	private JButton removeButton;
 	private JButton editButton;
 	private JTable intervalTable;
-	private LIntervalDialog lidialog;
+	private FIntervalDialog fidialog;
 	/**
 	 * Create the dialog.
 	 */
-	public LightEditDialog(JFrame owner, boolean modal) {
+	public FeederEditDialog(JFrame owner, boolean modal) {
 		super(owner,modal);
 		setBounds(100, 100, 450, 300);
-		lidialog = new LIntervalDialog(this,true);
-		lidialog.setVisible(false);
+		fidialog = new FIntervalDialog(this,true);
+		fidialog.setVisible(false);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
@@ -114,7 +116,7 @@ public class LightEditDialog extends JDialog implements ActionListener{
 		}
 	}
 	
-	private class LIntervalDialog extends JDialog implements ActionListener{
+	private class FIntervalDialog extends JDialog implements ActionListener{
 
 		public static final int NEW = 0;
 		public static final int EDIT = 1;
@@ -127,9 +129,10 @@ public class LightEditDialog extends JDialog implements ActionListener{
 		/**
 		 * Create the dialog.
 		 */
-		public LIntervalDialog(JDialog owner, boolean modal) {
+		public FIntervalDialog(JDialog owner, boolean modal) {
 			super(owner,modal);
 			setBounds(100, 100, 346, 156);
+			setResizable(false);
 			BorderLayout borderLayout = new BorderLayout();
 			borderLayout.setVgap(5);
 			borderLayout.setHgap(5);
@@ -203,6 +206,7 @@ public class LightEditDialog extends JDialog implements ActionListener{
 					buttonPane.add(cancelButton);
 				}
 			}
+			pack();
 		}
 		
 		public void setMode(int mode){
@@ -229,10 +233,11 @@ public class LightEditDialog extends JDialog implements ActionListener{
 							Integer.parseInt(startMField.getText()),
 							Double.parseDouble(lumField.getText()));
 					tm.fireTableDataChanged();
+					editButton.setEnabled(true);
+					removeButton.setEnabled(true);
+					intervalTable.setRowSelectionInterval(0, 0);
 				} else{
-					
 					tm.getInterval(intervalTable.getSelectedRow()).setStarttime(Integer.parseInt(startHField.getText()), Integer.parseInt(startMField.getText()));
-					tm.getInterval(intervalTable.getSelectedRow()).setStoptime(Integer.parseInt(startHField.getText()), Integer.parseInt(startMField.getText()));
 					tm.getInterval(intervalTable.getSelectedRow()).setBrightness(Double.parseDouble(lumField.getText()));
 					tm.fireTableDataChanged();
 				}
@@ -243,12 +248,15 @@ public class LightEditDialog extends JDialog implements ActionListener{
 			}
 		}
 	}
-	public void loadEntry(LightTM lightTM) {
+	public void loadEntry(FeederTM feederTM) {
 			// TODO Auto-generated method stub
 		try {
-			intervalTable.setModel(lightTM.clone());
-			if(!(((LightTM)intervalTable.getModel()).isEmpty())){
+			intervalTable.setModel(feederTM.clone());
+			if(!(((FeederTM)intervalTable.getModel()).isEmpty())){
 				intervalTable.setRowSelectionInterval(0, 0);
+			} else{
+				editButton.setEnabled(false);
+				removeButton.setEnabled(false);
 			}
 		} catch (CloneNotSupportedException e) {
 			// TODO Auto-generated catch block
@@ -259,8 +267,8 @@ public class LightEditDialog extends JDialog implements ActionListener{
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
 		if(e.getActionCommand().equals("Add Interval")){
-			lidialog.setMode(LIntervalDialog.NEW);
-			lidialog.setVisible(true);
+			fidialog.setMode(FIntervalDialog.NEW);
+			fidialog.setVisible(true);
 		} else if(e.getActionCommand().equals("Remove Interval")){
 			int last_select = intervalTable.getSelectedRow();
 			((LightTM)intervalTable.getModel()).removeInterval(last_select);
@@ -268,9 +276,13 @@ public class LightEditDialog extends JDialog implements ActionListener{
 			if((last_select-1)>-1){
 				intervalTable.setRowSelectionInterval(last_select-1, last_select-1);
 			}
+			if(((LightTM)intervalTable.getModel()).isEmpty()){
+				editButton.setEnabled(false);
+				removeButton.setEnabled(false);
+			}
 		} else if(e.getActionCommand().equals("Edit Interval")){
-			lidialog.setMode(LIntervalDialog.EDIT);
-			lidialog.setVisible(true);
+			fidialog.setMode(FIntervalDialog.EDIT);
+			fidialog.setVisible(true);
 		} else if(e.getActionCommand().equals("OK")){
 			((LightTM)intervalTable.getModel()).applySchedule();
 			dispose();

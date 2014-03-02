@@ -1,12 +1,11 @@
-package sch;
+package sch.light;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 
-import javax.swing.table.AbstractTableModel;
+import sch.SCHTableModel;
 
-public class LightTM extends AbstractTableModel{
+public class LightTM extends SCHTableModel{
 	/**
 	 * 
 	 */
@@ -66,7 +65,7 @@ public class LightTM extends AbstractTableModel{
 	}
 	
 	public void addInterval(int hour, int minute, double d){
-		intervals.add(new LightInterval(hour, minute, hour, minute, d));
+		intervals.add(new LightInterval(hour, minute, d));
 		Collections.sort(intervals);
 	}
 	

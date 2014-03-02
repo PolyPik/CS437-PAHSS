@@ -2,8 +2,6 @@ package sch;
 
 import it.sauronsoftware.cron4j.Scheduler;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public abstract class SCHEntry {
@@ -34,7 +32,7 @@ public abstract class SCHEntry {
 	
 	public abstract void stopSchedulers();
 	
-	//public abstract List<? extends SCHInterval> getIntervalList();
+	public abstract List<? extends SCHInterval> getIntervalList();
 	
 	public String getName(){
 		return name;
