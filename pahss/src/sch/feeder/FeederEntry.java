@@ -1,5 +1,6 @@
 package sch.feeder;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -11,6 +12,8 @@ public class FeederEntry extends SCHEntry {
 	private List<FeederInterval> interval_list;
 	private FeederRunnable feeder_runnable;
 	private double rate = 0;
+	
+
 	private boolean isSendStart;
 
 	public FeederEntry(String name, String id) {
@@ -31,6 +34,10 @@ public class FeederEntry extends SCHEntry {
 	public void removeInterval(int i){
 		interval_list.remove(i);
 		Collections.sort(interval_list);
+	}
+	
+	public double getRate() {
+		return rate;
 	}
 	
 	public void setRate(double rate){
@@ -75,7 +82,8 @@ public class FeederEntry extends SCHEntry {
 	}
 	
 	private boolean checkTime(){
-		int timeval = (Calendar.HOUR_OF_DAY*60)+Calendar.MINUTE;
+		Calendar now = Calendar.getInstance();
+		int timeval = (now.get(Calendar.HOUR_OF_DAY)*60)+now.get(Calendar.MINUTE);
 		int startval, stopval;
 		for(int i = 0; i < interval_list.size(); i++){
 			startval = (interval_list.get(i).getStart_hour()*60)+interval_list.get(i).getStart_minute();
@@ -120,9 +128,25 @@ public class FeederEntry extends SCHEntry {
 		public void run() {
 			// TODO Auto-generated method stub
 			if(isSendStart){
-				System.out.println(name+" is now dispensing fish feed");
+				//System.out.println(name+" is now dispensing fish feed at a rate of "+rate+" kg/min.");
+				try {
+					SCHEntry.notifications.write(name+" is now dispensing fish feed at a rate of "+rate+" kg/min.");
+					//SCHEntry.notifications.flush();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				isSendStart = false;
 			} else{
-				System.out.println(name+" has stopped dispensing fish feed");
+				//System.out.println(name+" has stopped dispensing fish feed");
+				try {
+					SCHEntry.notifications.write(name+" has stopped dispensing fish feed");
+					//SCHEntry.notifications.flush();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				isSendStart = true;
 			}
 			
 		}

@@ -19,6 +19,7 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.JTable;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
+import javax.swing.border.TitledBorder;
 
 
 public abstract class EntryEditDialog extends JDialog implements ActionListener{
@@ -81,6 +82,7 @@ public abstract class EntryEditDialog extends JDialog implements ActionListener{
 		}
 		
 		JScrollPane tableScrollPane = new JScrollPane();
+		tableScrollPane.setBorder(new TitledBorder(null, "Schedule", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		contentPanel.add(tableScrollPane, BorderLayout.CENTER);
 		
 		intervalTable = new JTable();
@@ -113,15 +115,17 @@ public abstract class EntryEditDialog extends JDialog implements ActionListener{
 		}
 	}
 	
-	protected abstract class IntervalDialog extends JDialog implements ActionListener{
+	public abstract class IntervalDialog extends JDialog implements ActionListener{
 
 		public static final int NEW = 0;
 		public static final int EDIT = 1;
-		private static final long serialVersionUID = -1719412600118554199L;
-		private final JPanel contentPanel = new JPanel();
-		private JTextField startHField;
-		private JTextField startMField;
-		private int mode;
+		protected static final long serialVersionUID = -1719412600118554199L;
+		protected final JPanel contentPanel;
+		protected JTextField startHField;
+		protected JTextField startMField;
+		protected JLabel startHLabel = new JLabel("Start Hour");
+		protected JLabel startMLabel = new JLabel("Start Minute");
+		protected int mode;
 		/**
 		 * Create the dialog.
 		 */
@@ -133,15 +137,12 @@ public abstract class EntryEditDialog extends JDialog implements ActionListener{
 			borderLayout.setVgap(5);
 			borderLayout.setHgap(5);
 			getContentPane().setLayout(borderLayout);
+			contentPanel = new JPanel();
 			contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 			getContentPane().add(contentPanel, BorderLayout.CENTER);
 			
-			JLabel startHLabel = new JLabel("Start Hour");
-			
 			startHField = new JTextField();
 			startHField.setColumns(10);
-			
-			JLabel startMLabel = new JLabel("Start Minute");
 			
 			startMField = new JTextField();
 			startMField.setColumns(10);
@@ -163,7 +164,6 @@ public abstract class EntryEditDialog extends JDialog implements ActionListener{
 					buttonPane.add(cancelButton);
 				}
 			}
-			pack();
 		}
 		
 		public abstract void setMode(int mode);

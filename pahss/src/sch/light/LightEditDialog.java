@@ -19,14 +19,11 @@ import javax.swing.JTable;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 
+import sch.EntryEditDialog;
 
-public class LightEditDialog extends JDialog implements ActionListener{
+
+public class LightEditDialog extends EntryEditDialog implements ActionListener{
 	private static final long serialVersionUID = -5954386544326168721L;
-	private final JPanel contentPanel = new JPanel();
-	private JButton addButton;
-	private JButton removeButton;
-	private JButton editButton;
-	private JTable intervalTable;
 	private LIntervalDialog lidialog;
 	/**
 	 * Create the dialog.
@@ -36,117 +33,16 @@ public class LightEditDialog extends JDialog implements ActionListener{
 		setBounds(100, 100, 450, 300);
 		lidialog = new LIntervalDialog(this,true);
 		lidialog.setVisible(false);
-		getContentPane().setLayout(new BorderLayout());
-		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-		getContentPane().add(contentPanel, BorderLayout.CENTER);
-		contentPanel.setLayout(new BorderLayout(0, 0));
-		{
-			JPanel modButtonPanel = new JPanel();
-			contentPanel.add(modButtonPanel, BorderLayout.EAST);
-			{
-				addButton = new JButton("Add Interval");
-				addButton.setActionCommand("Add Interval");
-				addButton.addActionListener(this);
-			}
-			
-			removeButton = new JButton("Remove Interval");
-			removeButton.setActionCommand("Remove Interval");
-			removeButton.addActionListener(this);
-			
-			editButton = new JButton("Edit Interval");
-			editButton.setActionCommand("Edit Interval");
-			editButton.addActionListener(this);
-			GroupLayout gl_modButtonPanel = new GroupLayout(modButtonPanel);
-			gl_modButtonPanel.setHorizontalGroup(
-				gl_modButtonPanel.createParallelGroup(Alignment.LEADING)
-					.addGroup(gl_modButtonPanel.createSequentialGroup()
-						.addContainerGap()
-						.addGroup(gl_modButtonPanel.createParallelGroup(Alignment.LEADING)
-							.addComponent(addButton, GroupLayout.DEFAULT_SIZE, 148, Short.MAX_VALUE)
-							.addComponent(removeButton, GroupLayout.DEFAULT_SIZE, 148, Short.MAX_VALUE)
-							.addComponent(editButton, GroupLayout.DEFAULT_SIZE, 148, Short.MAX_VALUE))
-						.addContainerGap())
-			);
-			gl_modButtonPanel.setVerticalGroup(
-				gl_modButtonPanel.createParallelGroup(Alignment.LEADING)
-					.addGroup(gl_modButtonPanel.createSequentialGroup()
-						.addContainerGap()
-						.addComponent(addButton)
-						.addPreferredGap(ComponentPlacement.RELATED)
-						.addComponent(removeButton)
-						.addPreferredGap(ComponentPlacement.RELATED)
-						.addComponent(editButton)
-						.addContainerGap(127, Short.MAX_VALUE))
-			);
-			modButtonPanel.setLayout(gl_modButtonPanel);
-		}
-		
-		JScrollPane tableScrollPane = new JScrollPane();
-		contentPanel.add(tableScrollPane, BorderLayout.CENTER);
-		
-		intervalTable = new JTable();
-		intervalTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		tableScrollPane.setViewportView(intervalTable);
-		{
-			JPanel buttonPane = new JPanel();
-			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
-			getContentPane().add(buttonPane, BorderLayout.SOUTH);
-			{
-				JButton okButton = new JButton("OK");
-				okButton.setActionCommand("OK");
-				okButton.addActionListener(this);
-				buttonPane.add(okButton);
-				getRootPane().setDefaultButton(okButton);
-			}
-			{
-				JButton cancelButton = new JButton("Cancel");
-				cancelButton.setActionCommand("Cancel");
-				cancelButton.addActionListener(this);
-				buttonPane.add(cancelButton);
-			}
-			{
-				JButton applyButton = new JButton("Apply");
-				applyButton.setActionCommand("Apply");
-				applyButton.addActionListener(this);
-				buttonPane.add(applyButton);
-				
-			}
-		}
 	}
 	
-	private class LIntervalDialog extends JDialog implements ActionListener{
-
-		public static final int NEW = 0;
-		public static final int EDIT = 1;
+	private class LIntervalDialog extends EntryEditDialog.IntervalDialog implements ActionListener{
 		private static final long serialVersionUID = -1719412600118554199L;
-		private final JPanel contentPanel = new JPanel();
-		private JTextField startHField;
-		private JTextField startMField;
 		private JTextField lumField;
-		private int mode;
 		/**
 		 * Create the dialog.
 		 */
 		public LIntervalDialog(JDialog owner, boolean modal) {
 			super(owner,modal);
-			setBounds(100, 100, 346, 156);
-			setResizable(false);
-			BorderLayout borderLayout = new BorderLayout();
-			borderLayout.setVgap(5);
-			borderLayout.setHgap(5);
-			getContentPane().setLayout(borderLayout);
-			contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-			getContentPane().add(contentPanel, BorderLayout.CENTER);
-			
-			JLabel startHLabel = new JLabel("Start Hour");
-			
-			startHField = new JTextField();
-			startHField.setColumns(10);
-			
-			JLabel startMLabel = new JLabel("Start Minute");
-			
-			startMField = new JTextField();
-			startMField.setColumns(10);
 			
 			JLabel lumLabel = new JLabel("Luminosity");
 			
@@ -183,27 +79,9 @@ public class LightEditDialog extends JDialog implements ActionListener{
 						.addGroup(gl_contentPanel.createParallelGroup(Alignment.BASELINE)
 							.addComponent(lumLabel)
 							.addComponent(lumField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-						.addContainerGap(21, Short.MAX_VALUE))
+						.addContainerGap())
 			);
 			contentPanel.setLayout(gl_contentPanel);
-			{
-				JPanel buttonPane = new JPanel();
-				getContentPane().add(buttonPane, BorderLayout.SOUTH);
-				buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT, 5, 5));
-				{
-					JButton okButton = new JButton("OK");
-					okButton.setActionCommand("OK");
-					okButton.addActionListener(this);
-					buttonPane.add(okButton);
-					getRootPane().setDefaultButton(okButton);
-				}
-				{
-					JButton cancelButton = new JButton("Cancel");
-					cancelButton.setActionCommand("Cancel");
-					cancelButton.addActionListener(this);
-					buttonPane.add(cancelButton);
-				}
-			}
 			pack();
 		}
 		
@@ -244,21 +122,6 @@ public class LightEditDialog extends JDialog implements ActionListener{
 			} else if(e.getActionCommand().equals("Cancel")){
 				setVisible(false);
 			}
-		}
-	}
-	public void loadEntry(LightTM lightTM) {
-			// TODO Auto-generated method stub
-		try {
-			intervalTable.setModel(lightTM.clone());
-			if(!(((LightTM)intervalTable.getModel()).isEmpty())){
-				intervalTable.setRowSelectionInterval(0, 0);
-			} else{
-				editButton.setEnabled(false);
-				removeButton.setEnabled(false);
-			}
-		} catch (CloneNotSupportedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 	}
 	@Override

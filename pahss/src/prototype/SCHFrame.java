@@ -25,7 +25,9 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 
+import pahss_core.NotificationWriter;
 import sch.*;
+import sch.feeder.FeederEntry;
 import sch.light.LightEntry;
 
 public class SCHFrame {
@@ -33,6 +35,7 @@ public class SCHFrame {
 	private JFrame frmPahss;
 	private SCHModel currentSCHModel;
 	private SCHPanel schpanel;
+	private JTextArea textArea = new JTextArea(5,55);
 	/**
 	 * Launch the application.
 	 */
@@ -55,11 +58,11 @@ public class SCHFrame {
 	public SCHFrame() {
 		currentSCHModel = new SCHModel();
 		initialize();
-		LightEntry entry1 = new LightEntry("Light 1", "L923334");
-		//SCHEntry entry2 = new FeederEntry("Entry 2");
-		//entry1.addInterval(3, 0, 3, 30,10.5);
+		FeederEntry entry1 = new FeederEntry("Feeder 1", "F923334");
+		LightEntry entry2 = new LightEntry("Light 1", "L349827");
+		SCHEntry.setNotifications(new NotificationWriter(textArea));
 		currentSCHModel.addEntry(entry1);
-		//currentSCHModel.addEntry(entry2);
+		currentSCHModel.addEntry(entry2);
 		schpanel.setSCHModel(currentSCHModel);
 	}
 
@@ -77,10 +80,9 @@ public class SCHFrame {
 		notificationArea.setLayout(new BorderLayout(0, 0));
 		//notificationArea.setPreferredSize(new Dimension(720, 100));
 		
-		JTextArea textArea = new JTextArea(5,55);
+		
 		textArea.setLineWrap(true);
 		textArea.setEditable(false);
-		
 		JScrollPane areaScrollPane = new JScrollPane(textArea);
 		areaScrollPane.setVerticalScrollBarPolicy(
 		                JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);

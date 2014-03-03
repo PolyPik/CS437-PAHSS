@@ -1,5 +1,6 @@
 package sch;
 
+import java.awt.Color;
 import java.awt.Component;
 
 import javax.swing.JLabel;
@@ -19,12 +20,18 @@ public class EntryRenderer extends JLabel implements ListCellRenderer<SCHEntry> 
 			boolean isSelected, boolean cellHasFocus) {
 		// TODO Auto-generated method stub
 		setText(value.getName());
+		setOpaque(true);
 		
 		if (isSelected) {
             setBackground(list.getSelectionBackground());
             setForeground(list.getSelectionForeground());
         } else {
-            setBackground(list.getBackground());
+            //setBackground(list.getBackground());
+            if(value.isStarted()){
+            	setBackground(new Color(200, 240, 200));
+            } else{
+            	setBackground(new Color(240, 200, 200));
+            }
             setForeground(list.getForeground());
         }
 		return this;

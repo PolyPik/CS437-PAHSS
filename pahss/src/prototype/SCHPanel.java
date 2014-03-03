@@ -15,10 +15,14 @@ import java.awt.GridLayout;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.LayoutStyle.ComponentPlacement;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 
 import sch.*;
+import sch.feeder.FeederEditDialog;
 import sch.feeder.FeederEntry;
+import sch.feeder.FeederTM;
 import sch.light.LightEditDialog;
 import sch.light.LightEntry;
 import sch.light.LightTM;
@@ -41,6 +45,7 @@ import java.awt.ComponentOrientation;
 
 import javax.swing.Box;
 
+import java.awt.Color;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
@@ -52,13 +57,15 @@ public class SCHPanel extends JPanel {
 	 */
 	private static final long serialVersionUID = -9216093653080287746L;
 	private LightEditDialog editdialog1;
+	private FeederEditDialog editdialog2;
 	private JTable intervalTable;
 	private SCHModel currentSCHModel;
+	private JButton startButton = new JButton("Start Schedule");
+	private JButton stopButton = new JButton("Stop Schedule");
+	private JButton editButton = new JButton("Edit Schedule");
 	JList<SCHEntry> entryList;
 	DefaultListModel<SCHEntry> EntryLM;
-	HashMap<SCHEntry,DefaultListModel<SCHInterval>> EntryIntervalMap;
-	HashMap<LightEntry,LightTM> LightIntervalMap;
-	HashMap<FeederEntry,DefaultTableModel> FeederIntervalMap;
+	HashMap<SCHEntry,SCHTableModel> LightIntervalMap;
 
 	/**
 	 * Create the panel.
@@ -71,8 +78,20 @@ public class SCHPanel extends JPanel {
 				// TODO Auto-generated method stub
 				super.windowClosed(e);
 				//System.out.println("Refresh");
-				((LightTM)intervalTable.getModel()).resyncEntry();
-				((LightTM)intervalTable.getModel()).fireTableDataChanged();
+				((SCHTableModel)intervalTable.getModel()).resyncEntry();
+				((SCHTableModel)intervalTable.getModel()).fireTableDataChanged();
+			}
+		});
+		
+		editdialog2 = new FeederEditDialog(frame,true);
+		editdialog2.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosed(WindowEvent e) {
+				// TODO Auto-generated method stub
+				super.windowClosed(e);
+				//System.out.println("Refresh");
+				((SCHTableModel)intervalTable.getModel()).resyncEntry();
+				((SCHTableModel)intervalTable.getModel()).fireTableDataChanged();
 			}
 		});
 		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
@@ -84,10 +103,10 @@ public class SCHPanel extends JPanel {
 		
 		EntryLM = new DefaultListModel<SCHEntry>();
 		entryList = new JList<SCHEntry>(EntryLM);
-		EntryIntervalMap = new HashMap<SCHEntry,DefaultListModel<SCHInterval>>();
-		LightIntervalMap = new HashMap<LightEntry,LightTM>();
+		LightIntervalMap = new HashMap<SCHEntry,SCHTableModel>();
 		EntryScrollPane.setViewportView(entryList);
 		entryList.setCellRenderer(new EntryRenderer());
+
 		
 		JScrollPane TableScrollPane = new JScrollPane();
 		TableScrollPane.setPreferredSize(new Dimension(200, 50));
@@ -107,7 +126,7 @@ public class SCHPanel extends JPanel {
 		gbl_buttonPanel.rowWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
 		buttonPanel.setLayout(gbl_buttonPanel);
 		
-		JButton editButton = new JButton("Edit Schedule");
+		
 		editButton.setPreferredSize(new Dimension(120, 40));
 		editButton.setMinimumSize(new Dimension(120, 40));
 		editButton.setMaximumSize(new Dimension(120, 40));
@@ -118,16 +137,22 @@ public class SCHPanel extends JPanel {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				editdialog1.loadEntry(LightIntervalMap.get((LightEntry)entryList.getSelectedValue()));
-				editdialog1.setVisible(true);
+				if(entryList.getSelectedValue() instanceof LightEntry){
+					editdialog1.loadEntry(LightIntervalMap.get((LightEntry)entryList.getSelectedValue()));
+					editdialog1.setVisible(true);
+				} else{
+					editdialog2.loadEntry(LightIntervalMap.get((FeederEntry)entryList.getSelectedValue()));
+					editdialog2.setVisible(true);
+				}
 			}
 		});
 		
-		JButton startButton = new JButton("Start Schedule");
+		
 		startButton.setPreferredSize(new Dimension(120, 40));
 		startButton.setMinimumSize(new Dimension(120, 40));
 		startButton.setMaximumSize(new Dimension(120, 40));
 		startButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+		startButton.setBackground(Color.GREEN);
 		GridBagConstraints gbc_startButton = new GridBagConstraints();
 		gbc_startButton.anchor = GridBagConstraints.SOUTH;
 		gbc_startButton.insets = new Insets(0, 0, 5, 0);
@@ -141,19 +166,27 @@ public class SCHPanel extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				entryList.getSelectedValue().startSchedulers();
+				startButton.setEnabled(false);
+				stopButton.setEnabled(true);
+				startButton.setBackground(null);
+				stopButton.setBackground(Color.RED);
 			}
 		});
 		
-		JButton stopButton = new JButton("Stop Schedule");
 		stopButton.setPreferredSize(new Dimension(120, 40));
 		stopButton.setMaximumSize(new Dimension(120, 40));
 		stopButton.setMinimumSize(new Dimension(120, 40));
 		stopButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 		stopButton.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
 		stopButton.setHorizontalTextPosition(SwingConstants.CENTER);
+		stopButton.setBackground(Color.RED);
 		stopButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				entryList.getSelectedValue().stopSchedulers();
+				startButton.setEnabled(true);
+				stopButton.setEnabled(false);
+				startButton.setBackground(Color.GREEN);
+				stopButton.setBackground(null);
 			}
 		});
 		GridBagConstraints gbc_stopButton = new GridBagConstraints();
@@ -165,14 +198,33 @@ public class SCHPanel extends JPanel {
 		gbc_editButton.gridx = 0;
 		gbc_editButton.gridy = 2;
 		buttonPanel.add(editButton, gbc_editButton);
-
+		
+		entryList.addListSelectionListener(new ListSelectionListener() {
+			
+			@Override
+			public void valueChanged(ListSelectionEvent arg0) {
+				// TODO Auto-generated method stub
+				intervalTable.setModel(LightIntervalMap.get(entryList.getSelectedValue()));
+				if(entryList.getSelectedValue().isStarted()){
+					startButton.setEnabled(false);
+					stopButton.setEnabled(true);
+					startButton.setBackground(null);
+					stopButton.setBackground(Color.RED);
+				} else{
+					startButton.setEnabled(true);
+					stopButton.setEnabled(false);
+					startButton.setBackground(Color.GREEN);
+					stopButton.setBackground(null);
+				}
+			}
+		});
 	}
 	
 	public void setSCHModel(SCHModel o){
 		currentSCHModel = o;
 		fillListModels();
 		entryList.setSelectedIndex(0);
-		intervalTable.setModel(LightIntervalMap.get((LightEntry)entryList.getSelectedValue()));
+		intervalTable.setModel(LightIntervalMap.get(entryList.getSelectedValue()));
 		//editdialog1.setTableModel(LightIntervalMap.get((LightEntry)entryList.getSelectedValue()));
 	}
 	
@@ -182,9 +234,9 @@ public class SCHPanel extends JPanel {
 		for(SCHEntry i: el){
 			EntryLM.addElement(i);
 			if(i instanceof LightEntry){
-				LightIntervalMap.put((LightEntry) i, new LightTM((LightEntry)i));
+				LightIntervalMap.put(i, new LightTM((LightEntry)i));
 			} else{
-				
+				LightIntervalMap.put(i, new FeederTM((FeederEntry)i));
 			}
 		}
 	}

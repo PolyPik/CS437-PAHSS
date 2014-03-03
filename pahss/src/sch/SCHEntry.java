@@ -4,6 +4,10 @@ import it.sauronsoftware.cron4j.Scheduler;
 
 import java.util.List;
 
+import javax.swing.JTextArea;
+
+import pahss_core.NotificationWriter;
+
 public abstract class SCHEntry {
 	protected String name;
 	protected String id;
@@ -11,9 +15,10 @@ public abstract class SCHEntry {
 	protected Scheduler stopper;
 	protected StringBuilder start_calendar;
 	protected StringBuilder stop_calendar;
-	boolean hasStarted= false;
+	protected boolean hasStarted= false;
 	protected String start_taskid;
 	protected String stop_taskid;
+	protected static NotificationWriter notifications;
 	
 	public SCHEntry(String name, String id){
 		this.name = name;
@@ -34,7 +39,15 @@ public abstract class SCHEntry {
 	
 	public abstract List<? extends SCHInterval> getIntervalList();
 	
+	public boolean isStarted(){
+		return starter.isStarted();
+	}
+	
 	public String getName(){
 		return name;
+	}
+	
+	public static void setNotifications(NotificationWriter notificationWriter) {
+		notifications = notificationWriter;
 	}
 }

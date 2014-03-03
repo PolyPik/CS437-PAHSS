@@ -74,6 +74,14 @@ public class FeederTM extends SCHTableModel {
 		Collections.sort(intervals);
 	}
 	
+	public double getRate(){
+		return entry.getRate();
+	}
+	
+	public void setRate(double rate){
+		entry.setRate(rate);
+	}
+	
 	public void sortIntervals(){
 		Collections.sort(intervals);
 	}

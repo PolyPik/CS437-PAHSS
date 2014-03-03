@@ -1,5 +1,6 @@
 package sch.light;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -19,14 +20,14 @@ public class LightEntry extends SCHEntry {
 		// TODO Auto-generated constructor stub
 	}
 	
-	public void addInterval(int hour1, int minute1, int hour2, int minute2, double lum) {
+	public void addInterval(int hour1, int minute1, double lum) {
 		// TODO Auto-generated method stub
 		LightInterval interv = new LightInterval(hour1, minute1, lum);
 		interval_list.add(interv);
 		Collections.sort(interval_list);
 	}
 	
-	public void editInterval(int i, int hour1, int minute1, int hour2, int minute2, double lum){
+	public void editInterval(int i, int hour1, int minute1, double lum){
 		LightInterval interv = interval_list.get(i);
 		interv.setStarttime(hour1, minute1);
 		interv.setBrightness(lum);
@@ -88,11 +89,12 @@ public class LightEntry extends SCHEntry {
 	
 	private int getNextBrightnessIndex(){
 		int i;
+		Calendar now = Calendar.getInstance();
 		for(i = 0; i < interval_list.size(); i++){
-			if(Calendar.HOUR_OF_DAY<interval_list.get(i).getStart_hour()){
+			if(now.get(Calendar.HOUR_OF_DAY)<interval_list.get(i).getStart_hour()){
 				return i;
-			} else if(Calendar.HOUR_OF_DAY==interval_list.get(i).getStart_hour()){
-				if(Calendar.MINUTE<interval_list.get(i).getStart_minute()){
+			} else if(now.get(Calendar.HOUR_OF_DAY)==interval_list.get(i).getStart_hour()){
+				if(now.get(Calendar.MINUTE)<interval_list.get(i).getStart_minute()){
 					return i;
 				}
 			}
@@ -109,7 +111,14 @@ public class LightEntry extends SCHEntry {
 		@Override
 		public void run() {
 			// TODO Auto-generated method stub
-			System.out.println(name+" has been set to "+interval_list.get(nextLumIndex).getBrightness()+" lumens");
+			//System.out.println(name+" has been set to "+interval_list.get(nextLumIndex).getBrightness()+" lumens");
+			try {
+				SCHEntry.notifications.write(name+" has been set to "+interval_list.get(nextLumIndex).getBrightness()+" lumens");
+				//SCHEntry.notifications.flush();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			nextLumIndex = ((nextLumIndex+1)%interval_list.size());
 		}
 	}
